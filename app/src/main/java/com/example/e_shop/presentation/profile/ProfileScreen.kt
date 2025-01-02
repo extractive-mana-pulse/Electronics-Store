@@ -3,6 +3,7 @@ package com.example.e_shop.presentation.profile
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -38,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.e_shop.R
+import com.example.e_shop.presentation.navigation.Screens
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true, showSystemUi = true)
@@ -88,6 +91,8 @@ fun ProfileScreen(
                         .height(105.dp)
                         .fillMaxWidth()
                         .background(MaterialTheme.colorScheme.primaryContainer),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
                 ) {
                     Image(
                         imageVector = Icons.Default.Person,
@@ -119,7 +124,14 @@ fun ProfileScreen(
                         .fillMaxWidth()
                         .padding(16.dp)
                         .height(56.dp)
-                        .background(MaterialTheme.colorScheme.surface)
+                        .background(MaterialTheme.colorScheme.surface),
+                    onClick = {
+                        Toast.makeText(
+                            context,
+                            "My orders",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 )
                 CustomRow(
                     icon = ImageVector.vectorResource(id = R.drawable.discount),
@@ -129,8 +141,29 @@ fun ProfileScreen(
                         .fillMaxWidth()
                         .padding(16.dp)
                         .height(50.dp)
-                        .background(MaterialTheme.colorScheme.surface)
+                        .background(MaterialTheme.colorScheme.surface),
+                    onClick = {
+                        Toast.makeText(
+                            context,
+                            "My discounts",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 )
+                Button(
+                    onClick = {
+                        navController.navigate(Screens.Home.route)
+                        Toast.makeText(
+                            context,
+                            "Sign out",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    },
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+
+                ) {
+                    Text(text = "Sign out")
+                }
             }
         }
     }
@@ -142,10 +175,11 @@ fun CustomRow(
     icon: ImageVector,
     contentDescription: String,
     context: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
 ) {
     Row(
-        modifier = modifier,
+        modifier = modifier.clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start
     ) {

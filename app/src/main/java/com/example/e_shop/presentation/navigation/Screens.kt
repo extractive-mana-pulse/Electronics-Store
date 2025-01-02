@@ -18,6 +18,7 @@ sealed class Screens(val route: String) {
         val price: Int,
         val image: String,
         val description: String,
-        val specs: String
+        val specs: String,
+        val category: String
     ) : Screens ("details")
 }

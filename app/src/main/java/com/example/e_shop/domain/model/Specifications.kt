@@ -2,7 +2,6 @@ package com.example.e_shop.domain.model
 
 import com.google.gson.annotations.SerializedName
 
-
 data class Specifications (
 
   @SerializedName("processor" ) var processor : String? = null,

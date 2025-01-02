@@ -1,6 +1,8 @@
 package com.example.e_shop.presentation.navigation
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -47,12 +49,11 @@ import com.example.e_shop.presentation.util.ui.BottomNavigationBar
 import com.example.e_shop.presentation.util.ui.items
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun AppNavigation(
     navController: NavHostController = rememberNavController()
 ) {
-
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val bottomBarState = rememberSaveable { (mutableStateOf(true)) }
     val navDrawerTopAppBar = rememberSaveable { (mutableStateOf(true)) }
@@ -147,47 +148,47 @@ fun AppNavigation(
                 }
             },
             bottomBar = {
-                BottomNavigationBar(bottomBarState = bottomBarState, navController = navController)
+                BottomNavigationBar(
+                    bottomBarState = bottomBarState,
+                    navController = navController
+                )
             }
         ) { innerPadding ->
 
-            NavHost(
-                navController = navController,
-                startDestination = Screens.Home.route,
-                modifier = Modifier.padding(
-                    start = innerPadding.calculateStartPadding(LayoutDirection.Ltr),
-                    // Only apply top padding if top bar is visible
-                    top = if (navDrawerTopAppBar.value) innerPadding.calculateTopPadding() else 0.dp,
-                    end = innerPadding.calculateEndPadding(LayoutDirection.Ltr),
-                    // Only apply bottom padding if bottom bar is visible
-                    bottom = if (bottomBarState.value) innerPadding.calculateBottomPadding() else 0.dp
-                )
-            ) {
-                composable(
-                    Screens.Home.route,
-                    enterTransition = { expandHorizontally() + fadeIn() },
-                    exitTransition = { shrinkHorizontally() + fadeOut() }
-                ) {
-                    HomeScreen(navController = navController)
-                }
-                composable(
-                    Screens.Profile.route,
-                    enterTransition = { expandHorizontally() + fadeIn() },
-                    exitTransition = { shrinkHorizontally() + fadeOut() }
-                ) {
-                    ProfileScreen(navController = navController)
-                }
-                composable<Screens.Details> {
-                    val argument = it.toRoute<Screens.Details>()
-                    DetailScreen(
-                        navController = navController,
-                        id = argument.id,
-                        name = argument.name,
-                        price = argument.price,
-                        image = argument.image,
-                        description = argument.description,
-                        specs = argument.specs
+            SharedTransitionLayout {
+                NavHost(
+                    navController = navController,
+                    startDestination = Screens.Home.route,
+                    modifier = Modifier.padding(
+                        start = innerPadding.calculateStartPadding(LayoutDirection.Ltr),
+                        top = if (navDrawerTopAppBar.value) innerPadding.calculateTopPadding() else 0.dp,
+                        end = innerPadding.calculateEndPadding(LayoutDirection.Ltr),
+                        bottom = if (bottomBarState.value) innerPadding.calculateBottomPadding() else 0.dp
                     )
+                ) {
+                    composable(Screens.Home.route) {
+                        HomeScreen(
+                            navController = navController,
+                            animatedVisibilityScope = this
+                        )
+                    }
+                    composable(Screens.Profile.route) {
+                        ProfileScreen(navController = navController)
+                    }
+                    composable<Screens.Details> {
+                        val argument = it.toRoute<Screens.Details>()
+                        DetailScreen(
+                            navController = navController,
+                            id = argument.id,
+                            name = argument.name,
+                            price = argument.price,
+                            image = argument.image,
+                            description = argument.description,
+                            specs = argument.specs,
+                            category = argument.category,
+                            animatedVisibilityScope = this
+                        )
+                    }
                 }
             }
         }

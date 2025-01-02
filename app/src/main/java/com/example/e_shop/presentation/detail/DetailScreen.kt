@@ -1,7 +1,12 @@
 package com.example.e_shop.presentation.detail
 
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,25 +22,29 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class,
+    ExperimentalSharedTransitionApi::class
+)
 @Composable
-fun DetailScreen(
+fun SharedTransitionScope.DetailScreen(
     navController: NavHostController = rememberNavController(),
     id: String,
     name: String,
     price: Int,
     image: String,
     description: String,
-    specs: String
+    specs: String,
+    category: String,
+    animatedVisibilityScope: AnimatedVisibilityScope
 ) {
     val finalPrice = price.div(100)
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -58,7 +67,20 @@ fun DetailScreen(
                 GlideImage(
                     model = image,
                     contentDescription = name,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(16 / 9f)
+                        .weight(1f)
+                        .sharedElement(
+                            state = rememberSharedContentState(key = image),
+                            animatedVisibilityScope = animatedVisibilityScope,
+                            boundsTransform = { initialRect, targetRect ->
+                                spring(
+                                    dampingRatio = 0.8f,
+                                    stiffness = 380f
+                                )
+                            }
+                        )
                 )
                 Text(
                     text = name,
@@ -81,20 +103,13 @@ fun DetailScreen(
                     modifier = Modifier.padding(16.dp),
                     style = MaterialTheme.typography.bodyMedium
                 )
+                Text(
+                    text = "Product Category: $category",
+                    modifier = Modifier.padding(16.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                )
             }
         }
     }
-}
-
-@Composable
-@Preview(showBackground = true, showSystemUi = true)
-fun DetailPreview() {
-    DetailScreen(
-        id = "1",
-        name = "Product 1",
-        price = 100,
-        image = "",
-        description = "This is product 1",
-        specs = "Hola mate"
-    )
 }

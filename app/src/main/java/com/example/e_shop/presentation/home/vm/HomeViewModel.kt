@@ -23,10 +23,7 @@ class HomeViewModel @Inject constructor(
     fun getAllProducts() {
         viewModelScope.launch {
             try {
-                Log.d("HomeViewModel", "Starting getAllProducts")
                 val products = useCase()
-                Log.d("HomeViewModel", "Success: products = $products")
-                Log.d("HomeViewModel", "Products size: ${products.products.size}")
                 _state.value = Resource.Success(products)
             } catch (e: Exception) {
                 _state.value = Resource.Error(e.message ?: "An unknown error occurred")

@@ -108,4 +108,6 @@ dependencies {
 
     // glide
     implementation (libs.compose)
+
+    implementation(libs.androidx.compose.animation)
 }
