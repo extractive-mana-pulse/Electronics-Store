@@ -6,7 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.e_shop.presentation.navigation.AppNavigation
+import com.example.e_shop.navigation.nav_host.AppNavigation
 import com.example.e_shop.ui.theme.EshopTheme
 import dagger.hilt.android.AndroidEntryPoint
 

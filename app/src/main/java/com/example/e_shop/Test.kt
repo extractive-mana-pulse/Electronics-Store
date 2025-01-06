@@ -1,10 +1,15 @@
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
@@ -12,11 +17,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 import com.example.e_shop.R
 
 @Preview(showBackground = true, showSystemUi = true)
@@ -26,22 +34,18 @@ fun NikeStoreUI() {
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Top Bar
         item {
             TopBar()
         }
 
-        // Search Bar
         item {
             SearchBar()
         }
 
-        // Categories Section
         item {
             CategoriesSection()
         }
 
-        // Top Selling Section
         item {
             TopSellingSection()
         }
@@ -51,11 +55,6 @@ fun NikeStoreUI() {
         item {
             TopSellingSection()
         }
-
-        // New In Section
-//        item {
-//            NewInSection()
-//        }
     }
 }
 
@@ -271,3 +270,127 @@ val topSellingItems = listOf(
     Product("Men's Harrington Jacket", 148.00, imageRes = R.drawable.ic_launcher_foreground),
     Product("Max Cirro Men's Slides", 55.00, 100.97, R.drawable.ic_launcher_foreground)
 )
+
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class)
+@Preview(showBackground = true)
+@Composable
+fun SearchBarExample() {
+
+    var text by remember { mutableStateOf("") }
+    var active by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        SearchBar(
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp).weight(1f).align(Alignment.CenterVertically), // Adjusted padding
+            query = text,
+            onQueryChange = { text = it },
+            onSearch = { active = false },
+            active = active,
+            onActiveChange = { active = it },
+            leadingIcon = {
+                Icon(
+                    Icons.Default.Search,
+                    contentDescription = "Search icon"
+                )
+            },
+            trailingIcon = {
+                Icon(
+                    Icons.Default.MoreVert,
+                    contentDescription = "Microphone icon"
+                )
+            },
+            placeholder = { Text("Search") }
+        ) {
+            // Search suggestions
+            repeat(4) { idx ->
+                val resultText = "Suggestion $idx"
+                ListItem(
+                    headlineContent = { Text(resultText) },
+                    supportingContent = { Text("Additional info") },
+                    leadingContent = { Icon(Icons.Default.Call, contentDescription = null) },
+                    modifier = Modifier
+                        .clickable {
+                            text = resultText
+                            active = false
+                        }
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                )
+            }
+        }
+
+        GlideImage(
+            model = R.drawable.ic_launcher_foreground,
+            contentDescription = "Profile Image",
+            modifier = Modifier.align(Alignment.CenterVertically)
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class)
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun SearchBarM3() {
+    var query by remember { mutableStateOf("") }
+    var active by remember { mutableStateOf(false) }
+
+    val searchHistory = listOf("Android", "Kotlin", "Compose", "Material Design", "GPT-4")
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        SearchBar(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            query = query,
+            onQueryChange = { query = it },
+            onSearch = { newQuery ->
+                println("Performing search on query: $newQuery")
+            },
+            active = active,
+            onActiveChange = { active = it },
+            placeholder = {
+                Text(text = "Search")
+            },
+            leadingIcon = {
+                Icon(imageVector = Icons.Filled.Search, contentDescription = "Search")
+            },
+            trailingIcon = {
+                Row {
+                    IconButton(onClick = { /**TODO: activate microphone */ }) {
+                        Icon(painter = painterResource(R.drawable.mic), contentDescription = "Mic")
+                    }
+                    if (active) {
+                        IconButton(
+                            onClick = { if (query.isNotEmpty()) query = "" else active = false }
+                        ) {
+                            Icon(imageVector = Icons.Filled.Close, contentDescription = "Close")
+                        }
+                    }
+                }
+            }
+        ) {
+            searchHistory.takeLast(3).forEach { item ->
+                ListItem(
+                    modifier = Modifier.clickable { query = item },
+                    headlineContent = { Text(text = item) },
+                    leadingContent = {
+                        Icon(
+                            painter = painterResource(R.drawable.history),
+                            contentDescription = null
+                        )
+                    }
+                )
+            }
+        }
+    }
+}
