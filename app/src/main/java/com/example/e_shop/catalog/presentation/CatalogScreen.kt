@@ -1,6 +1,5 @@
 package com.example.e_shop.catalog.presentation
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
@@ -126,11 +124,12 @@ fun CatalogScreen(
                                         id = it.Id.toString(),
                                         name = it.name.toString(),
                                         price = it.price.toString().toInt(),
-                                        image = it.productImages?.pi1.toString(),
+                                        image = it.productImages.toString(),
                                         description = it.description.toString(),
-                                        specs = it.specifications?.processor.toString(),
-                                        category = it.category.toString())
-                                    ) }
+                                        specs = it.specifications,
+                                        category = it.category.toString(),
+                                        productImages = it.productImages
+                                    ))}
                                 )
                             }
                         }

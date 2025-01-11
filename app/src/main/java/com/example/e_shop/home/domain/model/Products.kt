@@ -5,8 +5,8 @@ import com.google.gson.annotations.SerializedName
 
 data class Products (
 
-    @SerializedName("specifications" ) var specifications : Specifications?   = Specifications(),
-    @SerializedName("productImages"  ) var productImages  : ProductImages?    = ProductImages(),
+    @SerializedName("specifications" ) val specifications : Specifications   = Specifications(),
+    @SerializedName("productImages"  ) var productImages  : ProductImages    = ProductImages(),
     @SerializedName("_id"            ) var Id             : String?           = null,
     @SerializedName("name"           ) var name           : String?           = null,
     @SerializedName("brand"          ) var brand          : String?           = null,

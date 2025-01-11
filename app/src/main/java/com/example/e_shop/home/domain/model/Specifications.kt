@@ -1,14 +1,15 @@
 package com.example.e_shop.home.domain.model
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Specifications (
 
-  @SerializedName("processor" ) var processor : String? = null,
-  @SerializedName("cpu"       ) var cpu       : String? = null,
-  @SerializedName("gpu"       ) var gpu       : String? = null,
-  @SerializedName("ram"       ) var ram       : String? = null,
-  @SerializedName("storage"   ) var storage   : String? = null,
-  @SerializedName("display"   ) var display   : String? = null
+  val processor : String? = null,
+  val cpu       : String? = null,
+  val gpu       : String? = null,
+  val ram       : String? = null,
+  val storage   : String? = null,
+  val display   : String? = null
 
 )

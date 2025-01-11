@@ -1,8 +1,9 @@
 package com.example.e_shop.home.domain.model
 
 import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.Serializable
 
-
+@Serializable
 data class ProductImages (
 
   @SerializedName("pi_1" ) var pi1 : String? = null,

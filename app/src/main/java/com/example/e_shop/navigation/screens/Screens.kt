@@ -1,5 +1,7 @@
 package com.example.e_shop.navigation.screens
 
+import com.example.e_shop.home.domain.model.ProductImages
+import com.example.e_shop.home.domain.model.Specifications
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -26,7 +28,8 @@ sealed class Screens(val route: String) {
         val price: Int,
         val image: String,
         val description: String,
-        val specs: String,
-        val category: String
+        val specs: Specifications,
+        val category: String,
+        val productImages: ProductImages
     ) : Screens ("details")
 }

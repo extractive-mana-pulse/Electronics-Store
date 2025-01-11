@@ -45,10 +45,13 @@ import androidx.navigation.compose.rememberNavController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.e_shop.R
-import com.example.e_shop.home.domain.model.Root
 import com.example.e_shop.core.resource.Resource
+import com.example.e_shop.home.domain.model.Products
+import com.example.e_shop.home.domain.model.Root
+import com.example.e_shop.home.domain.model.Specifications
 import com.example.e_shop.home.presentation.home.vm.HomeViewModel
 import com.example.e_shop.navigation.screens.Screens
+import kotlinx.serialization.json.Json
 
 @SuppressLint("AutoboxingStateCreation")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
@@ -156,68 +159,85 @@ private fun SharedTransitionScope.Extracted(
                                     price = it.price!!,
                                     image = it.image.toString(),
                                     description = it.description.toString(),
-                                    specs = it.specifications.toString(),
-                                    category = it.category.toString()
+                                    specs = it.specifications,
+                                    category = it.category.toString(),
+                                    productImages = it.productImages
                                 )
                             )
                         }
-                ) {
-                    Column(
-                        verticalArrangement = Arrangement.Top,
-                        horizontalAlignment = Alignment.Start,
-                        modifier = Modifier.padding(8.dp)
-                    ) {
-                        GlideImage(
-                            model = it.image,
-                            contentDescription = it.name,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(250.dp)
-                                .aspectRatio(16 / 9f)
-                                .weight(1f)
-                                .sharedElement(
-                                    state = rememberSharedContentState(key = "${product.image}"),
-                                    animatedVisibilityScope = animatedVisibilityScope,
-                                    boundsTransform = { initialRect, targetRect ->
-                                        spring(
-                                            dampingRatio = 0.8f,
-                                            stiffness = 380f
-                                        )
-                                    },
-                                )
-                        )
-                        HorizontalDivider()
-
-                        Spacer(modifier = Modifier.height(4.dp))
-
-                        Text(
-                            text = it.name ?: "",
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontFamily = FontFamily(Font(R.font.poppins_black)),
-                                fontWeight = FontWeight.Light
-                            ),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "$${it.price?.div(100).toString()}",
-                            style = MaterialTheme.typography.titleSmall.copy(
-                                fontFamily = FontFamily(Font(R.font.gabarito_variable_font_wght)),
-                                fontWeight = FontWeight.Bold
-                            ),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = categories.toString(),
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                fontFamily = FontFamily(Font(R.font.poppins_black)),
-                                fontWeight = FontWeight.Light
-                            ),
-                        )
-                    }
+                )  {
+                    ItemUI(
+                        it,
+                        product,
+                        animatedVisibilityScope,
+                        categories
+                    )
                 }
             }
         }
+    }
+}
+
+@Composable
+@OptIn(ExperimentalGlideComposeApi::class, ExperimentalSharedTransitionApi::class)
+private fun SharedTransitionScope.ItemUI(
+    products: Products,
+    product: Products,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    categories: MutableSet<String>
+) {
+    Column(
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.Start,
+        modifier = Modifier.padding(8.dp)
+    ) {
+        GlideImage(
+            model = products.image,
+            contentDescription = products.name,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(250.dp)
+                .aspectRatio(16 / 9f)
+                .weight(1f)
+                .sharedElement(
+                    state = rememberSharedContentState(key = "${product.image}"),
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    boundsTransform = { initialRect, targetRect ->
+                        spring(
+                            dampingRatio = 0.8f,
+                            stiffness = 380f
+                        )
+                    },
+                )
+        )
+        HorizontalDivider()
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = products.name ?: "",
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontFamily = FontFamily(Font(R.font.poppins_black)),
+                fontWeight = FontWeight.Light
+            ),
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = "$${products.price?.div(100).toString()}",
+            style = MaterialTheme.typography.titleSmall.copy(
+                fontFamily = FontFamily(Font(R.font.gabarito_variable_font_wght)),
+                fontWeight = FontWeight.Bold
+            ),
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = categories.toString(),
+            style = MaterialTheme.typography.bodySmall.copy(
+                fontFamily = FontFamily(Font(R.font.poppins_black)),
+                fontWeight = FontWeight.Light
+            ),
+        )
     }
 }

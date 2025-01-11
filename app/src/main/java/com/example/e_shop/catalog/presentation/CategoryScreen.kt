@@ -1,9 +1,11 @@
 package com.example.e_shop.catalog.presentation
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,6 +14,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -23,14 +26,22 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
+import com.example.e_shop.R
+import com.example.e_shop.core.extensions.getCategoryInfo
 import com.example.e_shop.core.resource.Resource
 import com.example.e_shop.home.presentation.home.vm.HomeViewModel
 import com.example.e_shop.navigation.screens.Screens
@@ -81,38 +92,51 @@ fun CategoryScreen(
                         categorySet
                     }
                     CategoriesScreen(
-                    categories = categories,
-                    onCategoryClick = { category ->
-                        navController.navigate(
-                            Screens.Catalog(
-                                name = category
+                        categories = categories,
+                        onCategoryClick = { category ->
+                            navController.navigate(
+                                Screens.Catalog(
+                                    name = category
+                                )
                             )
-                        )
-                    }
-                ) }
+                        }
+                    )
+                }
             }
         }
     }
 }
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun CategoriesScreen(
     categories: Set<String>,
     onCategoryClick: (String) -> Unit
 ) {
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
         contentPadding = PaddingValues(16.dp)
     ) {
         items(categories.toList()) { category ->
-            Card(
+            val categoryInfo = getCategoryInfo(category)
+
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
-                    .clickable { onCategoryClick(category) }
+                    .clickable { onCategoryClick(category) },
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                GlideImage(
+                    model = categoryInfo.imageResource,
+                    contentDescription = "${categoryInfo.displayName} Image",
+                    modifier = Modifier.padding(16.dp),
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant)
+                )
                 Text(
-                    text = category,
+                    text = categoryInfo.displayName,
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(16.dp)
                 )

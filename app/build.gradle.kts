@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
+    id("kotlin-parcelize")
     id ("kotlin-kapt")
     id ("dagger.hilt.android.plugin")
 }
@@ -110,4 +111,10 @@ dependencies {
     implementation (libs.compose)
 
     implementation(libs.androidx.compose.animation)
+
+    implementation(libs.kotlinx.serialization.json)
+
+    // image slider
+    implementation (libs.accompanist.pager)
+    implementation (libs.accompanist.pager.indicators)
 }
