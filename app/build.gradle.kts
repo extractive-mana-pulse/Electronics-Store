@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
-    id("kotlin-parcelize")
     id ("kotlin-kapt")
     id ("dagger.hilt.android.plugin")
 }
@@ -83,7 +82,7 @@ dependencies {
     implementation(libs.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
 
-    // bottom navigation
+    // bottom bar
     implementation (libs.androidx.material)
 
     // gson
@@ -106,12 +105,12 @@ dependencies {
 
     // coil
     implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
 
-    // glide
-    implementation (libs.compose)
-
+    // animation
     implementation(libs.androidx.compose.animation)
 
+    // serialization
     implementation(libs.kotlinx.serialization.json)
 
     // image slider

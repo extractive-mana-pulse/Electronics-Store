@@ -23,8 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
-import com.bumptech.glide.integration.compose.GlideImage
+import coil3.compose.AsyncImage
 import com.example.e_shop.R
 
 @Preview(showBackground = true, showSystemUi = true)
@@ -272,7 +271,7 @@ val topSellingItems = listOf(
 )
 
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
 fun SearchBarExample() {
@@ -327,7 +326,7 @@ fun SearchBarExample() {
             }
         }
 
-        GlideImage(
+        AsyncImage(
             model = R.drawable.ic_launcher_foreground,
             contentDescription = "Profile Image",
             modifier = Modifier.align(Alignment.CenterVertically)
@@ -335,7 +334,7 @@ fun SearchBarExample() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun SearchBarM3() {

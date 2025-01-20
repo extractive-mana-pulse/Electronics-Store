@@ -24,12 +24,14 @@ sealed class Screens(val route: String) {
     @Serializable
     data class Details(
         val id: String,
-        val name: String,
-        val price: Int,
-        val image: String,
-        val description: String,
-        val specs: Specifications,
-        val category: String,
-        val productImages: ProductImages
+//        val name: String,
+//        val price: Int,
+//        val image: String,
+//        val description: String,
+//        val specs: Specifications,
+//        val category: String,
+//        val productImages: ProductImages,
+//        val features: String,
+//        val colors: String,
     ) : Screens ("details")
 }

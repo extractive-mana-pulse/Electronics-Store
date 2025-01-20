@@ -7,7 +7,7 @@ data class Products (
 
     @SerializedName("specifications" ) val specifications : Specifications   = Specifications(),
     @SerializedName("productImages"  ) var productImages  : ProductImages    = ProductImages(),
-    @SerializedName("_id"            ) var Id             : String?           = null,
+    @SerializedName("_id"            ) val _id             : String           = "",
     @SerializedName("name"           ) var name           : String?           = null,
     @SerializedName("brand"          ) var brand          : String?           = null,
     @SerializedName("price"          ) var price          : Int?              = null,

@@ -33,25 +33,19 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.example.e_shop.catalog.presentation.CatalogScreen
 import com.example.e_shop.catalog.presentation.CategoryScreen
 import com.example.e_shop.core.util.BottomNavigationBar
-import com.example.e_shop.core.util.CustomNavType
 import com.example.e_shop.core.util.items
-import com.example.e_shop.home.domain.model.ProductImages
-import com.example.e_shop.home.domain.model.Specifications
 import com.example.e_shop.home.presentation.detail.DetailScreen
 import com.example.e_shop.home.presentation.home.screen.HomeScreen
 import com.example.e_shop.navigation.screens.Screens
 import com.example.e_shop.profile.presentation.ProfileScreen
 import kotlinx.coroutines.launch
-import kotlin.reflect.typeOf
 
 @OptIn(
     ExperimentalMaterial3Api::class,
     ExperimentalSharedTransitionApi::class,
-    ExperimentalGlideComposeApi::class
 )
 @Composable
 fun AppNavigation(
@@ -179,23 +173,26 @@ fun AppNavigation(
                     }
 
                     composable<Screens.Details>(
-                        typeMap = mapOf(
-                            typeOf<Specifications>() to CustomNavType.specType,
-                            typeOf<ProductImages>() to CustomNavType.picType
-                        )
+//                        typeMap = mapOf(
+//                            typeOf<Specifications>() to CustomNavType.specType,
+//                            typeOf<ProductImages>() to CustomNavType.picType
+//                        )
                     ) {
                         val argument = it.toRoute<Screens.Details>()
                         DetailScreen(
                             navController = navController,
+                            animatedVisibilityScope = this,
                             id = argument.id,
-                            name = argument.name,
-                            price = argument.price,
-                            image = argument.image,
-                            description = argument.description,
-                            specs = argument.specs,
-                            category = argument.category,
-                            productImages = argument.productImages,
-                            animatedVisibilityScope = this
+//                            id = argument.id,
+//                            name = argument.name,
+//                            price = argument.price,
+//                            image = argument.image,
+//                            description = argument.description,
+//                            specs = argument.specs,
+//                            category = argument.category,
+//                            productImages = argument.productImages,
+//                            features = argument.features,
+//                            colors = argument.colors
                         )
                     }
                 }

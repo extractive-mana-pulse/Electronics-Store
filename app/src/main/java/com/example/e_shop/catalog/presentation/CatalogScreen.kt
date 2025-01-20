@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -42,13 +43,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
-import com.bumptech.glide.integration.compose.GlideImage
+import coil3.compose.AsyncImage
 import com.example.e_shop.core.resource.Resource
 import com.example.e_shop.home.domain.model.Products
 import com.example.e_shop.home.presentation.home.vm.HomeViewModel
 import com.example.e_shop.navigation.screens.Screens
-import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -120,15 +119,18 @@ fun CatalogScreen(
                             items(filteredProducts.size) { index ->
                                 ProductCard(
                                     product = filteredProducts[index],
-                                    onProductClick = { navController.navigate(Screens.Details(
-                                        id = it.Id.toString(),
-                                        name = it.name.toString(),
-                                        price = it.price.toString().toInt(),
-                                        image = it.productImages.toString(),
-                                        description = it.description.toString(),
-                                        specs = it.specifications,
-                                        category = it.category.toString(),
-                                        productImages = it.productImages
+                                    onProductClick = {
+                                        navController.navigate(Screens.Details(
+                                        id = it._id.toString(),
+//                                        name = it.name.toString(),
+//                                        price = it.price.toString().toInt(),
+//                                        image = it.productImages.toString(),
+//                                        description = it.description.toString(),
+//                                        specs = it.specifications,
+//                                        category = it.category.toString(),
+//                                        productImages = it.productImages,
+//                                        features = it.features.toString(),
+//                                        colors = it.colors.joinToString()
                                     ))}
                                 )
                             }
@@ -140,7 +142,6 @@ fun CatalogScreen(
     }
 }
 
-@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun ProductCard(
     product: Products,
@@ -157,35 +158,26 @@ fun ProductCard(
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top
         ) {
-            // Product Image
-            GlideImage(
-                model = product.productImages?.pi1,
+            AsyncImage(
+                model = product.image ?: Icons.Default.Close,
                 contentDescription = product.name,
                 modifier = Modifier.fillMaxWidth().height(180.dp),
                 contentScale = ContentScale.Crop
             )
-
             Spacer(modifier = Modifier.height(8.dp))
-
-            // Product Title
             Text(
                 text = product.name ?: "",
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
-
             Spacer(modifier = Modifier.height(4.dp))
-
-            // Product Price
             Text(
                 text = "$${product.price?.div(100)}",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold
             )
-
-            // Product Rating
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(top = 4.dp)
@@ -197,7 +189,7 @@ fun ProductCard(
                     modifier = Modifier.size(16.dp)
                 )
                 Text(
-                    text = "%.2f".format(Random.nextDouble(from = 0.0, until = 5.0)),
+                    text = product.rating.toString(),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(start = 4.dp)
                 )
