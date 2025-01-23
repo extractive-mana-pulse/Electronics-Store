@@ -33,8 +33,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.example.e_shop.catalog.presentation.CatalogScreen
-import com.example.e_shop.catalog.presentation.CategoryScreen
+import com.example.e_shop.catalog.presentation.CategoryProductsScreen
+import com.example.e_shop.catalog.presentation.CategoriesListScreen
 import com.example.e_shop.core.util.BottomNavigationBar
 import com.example.e_shop.core.util.items
 import com.example.e_shop.home.presentation.detail.DetailScreen
@@ -157,12 +157,12 @@ fun AppNavigation(
                     }
 
                     composable(Screens.Category.route) {
-                        CategoryScreen(navController = navController)
+                        CategoriesListScreen(navController = navController)
                     }
 
                     composable<Screens.Catalog> {
                         val argument = it.toRoute<Screens.Catalog>()
-                        CatalogScreen(
+                        CategoryProductsScreen(
                             navController = navController,
                             name = argument.name
                         )

@@ -42,6 +42,7 @@ fun ColorDropdown(
     Column(modifier = modifier) {
         Surface(
             modifier = Modifier
+                .height(56.dp)
                 .fillMaxWidth()
                 .onSizeChanged {
                     dropdownMenuWidth = with(density) { it.width.toDp() }

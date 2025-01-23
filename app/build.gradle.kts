@@ -116,4 +116,14 @@ dependencies {
     // image slider
     implementation (libs.accompanist.pager)
     implementation (libs.accompanist.pager.indicators)
+
+    // room
+    implementation (libs.androidx.room.ktx)
+    // noinspection KaptUsageInsteadOfKsp
+    kapt (libs.androidx.room.compiler)
+    implementation (libs.androidx.room.paging)
+
+    // paging
+    implementation (libs.androidx.paging.runtime.ktx)
+    implementation (libs.androidx.paging.compose)
 }

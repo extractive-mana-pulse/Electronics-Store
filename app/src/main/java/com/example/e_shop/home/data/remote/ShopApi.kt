@@ -11,4 +11,7 @@ interface ShopApi {
 
     @GET("/api/products")
     suspend fun getProductById(@Query("_id") id: String): Root
+
+    @GET("/api/products")
+    suspend fun getSortedProductsByCategory(@Query("category") category: String): Root
 }

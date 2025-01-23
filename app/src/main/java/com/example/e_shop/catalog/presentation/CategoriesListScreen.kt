@@ -12,16 +12,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,11 +26,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil3.compose.AsyncImage
+import com.example.e_shop.R
 import com.example.e_shop.core.extensions.getCategoryInfo
 import com.example.e_shop.core.resource.Resource
 import com.example.e_shop.home.presentation.home.vm.HomeViewModel
@@ -42,7 +43,7 @@ import com.example.e_shop.navigation.screens.Screens
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CategoryScreen(
+fun CategoriesListScreen(
     navController: NavController = rememberNavController()
 ) {
     val viewModel: HomeViewModel = hiltViewModel()
@@ -52,13 +53,17 @@ fun CategoryScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(text = "Categories") },
-                actions = {
-                    IconButton(onClick = { navController.navigate("search") }) {
-                        Icon(Icons.Default.Search, contentDescription = "Search")
-                    }
-                },
+            MediumTopAppBar(
+                title = {
+                    Text(
+                        text = "Shop by Categories",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily(Font(R.font.gabarito_regular)),
+                            fontSize = 24.sp
+                        ),
+                        )},
+                modifier = Modifier,
                 scrollBehavior = scrollBehavior
             )
         }
@@ -72,7 +77,9 @@ fun CategoryScreen(
             LaunchedEffect(true) { viewModel.getAllProducts() }
             when (state) {
                 is Resource.Error -> { Toast.makeText(context, "Error", Toast.LENGTH_SHORT).show() }
-                is Resource.Loading -> { CircularProgressIndicator() }
+                is Resource.Loading -> {
+                    CircularProgressIndicator()
+                }
                 is Resource.Success -> {
                     val categories = remember(state) {
                         val categorySet = mutableSetOf<String>()

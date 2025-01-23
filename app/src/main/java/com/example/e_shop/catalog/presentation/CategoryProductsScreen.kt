@@ -1,6 +1,5 @@
 package com.example.e_shop.catalog.presentation
 
-import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,127 +12,129 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil3.compose.AsyncImage
+import com.example.e_shop.R
+import com.example.e_shop.core.extensions.toastMessage
 import com.example.e_shop.core.resource.Resource
+import com.example.e_shop.core.util.CircularLoadingProgress
 import com.example.e_shop.home.domain.model.Products
-import com.example.e_shop.home.presentation.home.vm.HomeViewModel
 import com.example.e_shop.navigation.screens.Screens
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CatalogScreen(
+fun CategoryProductsScreen(
     navController: NavController = rememberNavController(),
     name: String,
 ) {
-    val viewModel: HomeViewModel = hiltViewModel()
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val viewModel: CatalogViewModel = hiltViewModel()
     val state = viewModel.state.value
     val context = LocalContext.current
 
     Scaffold(
+        modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(
-                title = { Text(text = "Catalog - $name") },
-                modifier = Modifier,
+            MediumTopAppBar(
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
+                    IconButton(
+                        onClick = { navController.navigateUp() },
+                        modifier = Modifier.size(48.dp).clip(RoundedCornerShape(24.dp))
+                    ) {
                         Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "Back")
                     }
-                }
+                },
+                title = {
+                    Text(
+                        text = "Shop by Categories",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily(Font(R.font.gabarito_regular)),
+                            fontSize = 24.sp
+                        ),
+                    )},
+                scrollBehavior = scrollBehavior
             )
         }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-        ) {
-            LaunchedEffect(true) { viewModel.getAllProducts() }
-
-            when (state) {
-                is Resource.Error -> {
-                    Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+        LaunchedEffect(true) { viewModel.getSortedProductsByCategory(name) }
+        when (state) {
+            is Resource.Error -> {
+                toastMessage(context = context, message = state.message.toString())
+            }
+            is Resource.Loading -> {
+                CircularLoadingProgress()
+            }
+            is Resource.Success -> {
+                val filteredProducts = remember(state, name) {
+                    state.data?.products?.filter { product ->
+                        product.category?.split(",")?.map { it.trim() }?.contains(name) == true
+                    } ?: emptyList()
                 }
-                is Resource.Loading -> {
+
+                if (filteredProducts.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator()
+                        Text(
+                            text = "No products found in this category",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
                     }
-                }
-                is Resource.Success -> {
-                    val filteredProducts = remember(state, name) {
-                        state.data?.products?.filter { product ->
-                            product.category?.split(",")?.map { it.trim() }?.contains(name) == true
-                        } ?: emptyList()
-                    }
-
-                    if (filteredProducts.isEmpty()) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "No products found in this category",
-                                style = MaterialTheme.typography.bodyLarge
+                } else {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        modifier = Modifier.fillMaxSize().padding(innerPadding),
+                        contentPadding = PaddingValues(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(filteredProducts.size) { index ->
+                            ProductCard(
+                                product = filteredProducts[index],
+                                onProductClick = {
+                                    navController.navigate(Screens.Details(id = it._id.toString()))
+                                }
                             )
-                        }
-                    } else {
-                        LazyVerticalGrid(
-                            columns = GridCells.Fixed(2),
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            items(filteredProducts.size) { index ->
-                                ProductCard(
-                                    product = filteredProducts[index],
-                                    onProductClick = {
-                                        navController.navigate(Screens.Details(
-                                        id = it._id.toString(),
-//                                        name = it.name.toString(),
-//                                        price = it.price.toString().toInt(),
-//                                        image = it.productImages.toString(),
-//                                        description = it.description.toString(),
-//                                        specs = it.specifications,
-//                                        category = it.category.toString(),
-//                                        productImages = it.productImages,
-//                                        features = it.features.toString(),
-//                                        colors = it.colors.joinToString()
-                                    ))}
-                                )
-                            }
                         }
                     }
                 }

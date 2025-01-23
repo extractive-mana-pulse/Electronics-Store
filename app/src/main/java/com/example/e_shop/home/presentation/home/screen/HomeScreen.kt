@@ -2,7 +2,7 @@ package com.example.e_shop.home.presentation.home.screen
 
 import SearchBarM3
 import android.annotation.SuppressLint
-import android.widget.Toast
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -21,11 +21,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -34,8 +34,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -47,11 +49,16 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil3.compose.AsyncImage
 import com.example.e_shop.R
+import com.example.e_shop.catalog.presentation.CatalogViewModel
+import com.example.e_shop.core.extensions.getCategoryInfo
+import com.example.e_shop.core.extensions.toastMessage
 import com.example.e_shop.core.resource.Resource
+import com.example.e_shop.core.util.CircularLoadingProgress
 import com.example.e_shop.home.domain.model.Products
 import com.example.e_shop.home.domain.model.Root
 import com.example.e_shop.home.presentation.home.vm.HomeViewModel
 import com.example.e_shop.navigation.screens.Screens
+import kotlin.text.split
 
 @SuppressLint("AutoboxingStateCreation")
 @OptIn(
@@ -72,13 +79,15 @@ fun SharedTransitionScope.HomeScreen(
         topBar = { SearchBarM3() }
     ) { innerPadding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(innerPadding),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
             when (val state = viewModel.state.value) {
                 is Resource.Loading -> {
-                    CircularProgressIndicator()
+                    CircularLoadingProgress()
                 }
                 is Resource.Success -> {
                     ProductItem(
@@ -88,11 +97,7 @@ fun SharedTransitionScope.HomeScreen(
                     )
                 }
                 is Resource.Error -> {
-                    Toast.makeText(
-                        context,
-                        state.message ?: "An unknown error occurred",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    toastMessage(context = context, message = state.message ?: "An unknown error occurred",)
                 }
             }
         }
@@ -110,21 +115,88 @@ fun SharedTransitionScope.ProductItem(
     animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
     val state = viewModel.state.value
+    val categories = remember(state) {
+        val categorySet = mutableSetOf<String>()
+        if (true) {
+            state.data?.products?.forEach { product ->
+                product.category?.split(",")?.forEach { category ->
+                    categorySet.add(category.trim())
+                }
+            }
+        }
+        categorySet
+    }
 
     LazyColumn {
         item {
-            Extracted(
+            ProductSection(
                 state,
                 navController,
                 animatedVisibilityScope
             )
+        }
+        items(categories.toList()) { category ->
+            val categoryInfo = getCategoryInfo(category)
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    AsyncImage(
+                        model = categoryInfo.imageResource,
+                        contentDescription = "${categoryInfo.displayName} Image",
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .size(24.dp),
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant)
+                    )
+                    Text(
+                        text = categoryInfo.displayName,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+                MobileSection(
+                    categoryInfo.displayName,
+                    navController,
+                    animatedVisibilityScope
+                )
+            }
         }
     }
 }
 
 @Composable
 @OptIn(ExperimentalSharedTransitionApi::class)
-private fun SharedTransitionScope.Extracted(
+fun SharedTransitionScope.MobileSection(
+    categoryName: String,
+    navController: NavController,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+) {
+    val catalogViewModel : CatalogViewModel = hiltViewModel()
+    LaunchedEffect(true) { catalogViewModel.getSortedProductsByCategory(categoryName) }
+    val state1 = catalogViewModel.state.value
+    val context = LocalContext.current
+
+    Log.d("HomeScreen", "MobileSection: $categoryName")
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        // Todo: Implement all categories here.
+    }
+}
+
+@Composable
+@OptIn(ExperimentalSharedTransitionApi::class)
+private fun SharedTransitionScope.ProductSection(
     state: Resource<Root>,
     navController: NavController,
     animatedVisibilityScope: AnimatedVisibilityScope,
@@ -136,12 +208,14 @@ private fun SharedTransitionScope.Extracted(
         verticalArrangement = Arrangement.Center
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "",
+                text = "All products",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -158,23 +232,13 @@ private fun SharedTransitionScope.Extracted(
                                 navController.navigate(
                                     Screens.Details(
                                         id = it._id,
-//                                        name = it.name.toString(),
-//                                        price = it.price!!,
-//                                        image = it.image.toString(),
-//                                        description = it.description.toString(),
-//                                        specs = it.specifications,
-//                                        category = it.category.toString(),
-//                                        productImages = it.productImages,
-//                                        features = it.features.toString(),
-//                                        colors = it.colors.joinToString()
                                     )
                                 )
                             }
-                    )  {
+                    ) {
                         ItemUI(
-                            it,
-                            product,
-                            animatedVisibilityScope,
+                            products = it,
+                            animatedVisibilityScope = animatedVisibilityScope,
                         )
                     }
                 }
@@ -220,7 +284,6 @@ private fun SharedTransitionScope.Extracted(
 @OptIn(ExperimentalSharedTransitionApi::class)
 private fun SharedTransitionScope.ItemUI(
     products: Products,
-    product: Products,
     animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
     Column(
@@ -238,7 +301,7 @@ private fun SharedTransitionScope.ItemUI(
                 .aspectRatio(16 / 9f)
                 .weight(1f)
                 .sharedElement(
-                    state = rememberSharedContentState(key = "${product.image}"),
+                    state = rememberSharedContentState(key = "${products.image}"),
                     animatedVisibilityScope = animatedVisibilityScope,
                     boundsTransform = { initialRect, targetRect ->
                         spring(
