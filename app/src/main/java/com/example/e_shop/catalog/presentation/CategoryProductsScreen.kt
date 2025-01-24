@@ -1,5 +1,6 @@
 package com.example.e_shop.catalog.presentation
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
@@ -65,30 +67,40 @@ fun CategoryProductsScreen(
     navController: NavController = rememberNavController(),
     name: String,
 ) {
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val viewModel: CatalogViewModel = hiltViewModel()
     val state = viewModel.state.value
     val context = LocalContext.current
+    val filteredProducts = remember(state, name) {
+        state.data?.products?.filter { product ->
+            product.category?.split(",")?.map { it.trim() }?.contains(name) == true
+        } ?: emptyList()
+    }
 
     Scaffold(
-        modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = Modifier
+            .fillMaxSize()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             MediumTopAppBar(
                 navigationIcon = {
                     IconButton(
                         onClick = { navController.navigateUp() },
-                        modifier = Modifier.size(48.dp).clip(RoundedCornerShape(24.dp))
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(RoundedCornerShape(24.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
                     ) {
-                        Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Default.KeyboardArrowLeft, contentDescription = "Navigate back")
                     }
                 },
                 title = {
                     Text(
-                        text = "Shop by Categories",
+                        text = name + ( " (" +filteredProducts.size + ")"),
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily(Font(R.font.gabarito_regular)),
-                            fontSize = 24.sp
+                            fontFamily = FontFamily(Font(R.font.gabarito_bold)),
+                            fontSize = 18.sp
                         ),
                     )},
                 scrollBehavior = scrollBehavior
@@ -104,11 +116,6 @@ fun CategoryProductsScreen(
                 CircularLoadingProgress()
             }
             is Resource.Success -> {
-                val filteredProducts = remember(state, name) {
-                    state.data?.products?.filter { product ->
-                        product.category?.split(",")?.map { it.trim() }?.contains(name) == true
-                    } ?: emptyList()
-                }
 
                 if (filteredProducts.isEmpty()) {
                     Box(
@@ -123,7 +130,9 @@ fun CategoryProductsScreen(
                 } else {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(2),
-                        modifier = Modifier.fillMaxSize().padding(innerPadding),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding),
                         contentPadding = PaddingValues(16.dp),
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -155,14 +164,18 @@ fun ProductCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(all = 8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(all = 8.dp),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top
         ) {
             AsyncImage(
                 model = product.image ?: Icons.Default.Close,
                 contentDescription = product.name,
-                modifier = Modifier.fillMaxWidth().height(180.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp),
                 contentScale = ContentScale.Crop
             )
             Spacer(modifier = Modifier.height(8.dp))

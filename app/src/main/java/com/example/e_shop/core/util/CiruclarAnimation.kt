@@ -47,7 +47,7 @@ import kotlin.math.sqrt
     ExperimentalPagerApi::class
 )
 @Composable
-fun MyCarousel(
+fun AnimatedImageSlider(
     imageSlider: List<String?>,
     modifier: Modifier = Modifier
 ) {

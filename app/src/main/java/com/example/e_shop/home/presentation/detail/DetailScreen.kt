@@ -4,12 +4,12 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -39,7 +39,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
@@ -50,21 +49,15 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import coil3.compose.SubcomposeAsyncImage
-import coil3.request.ImageRequest
-import coil3.request.crossfade
 import com.example.e_shop.R
 import com.example.e_shop.core.extensions.toastMessage
 import com.example.e_shop.core.resource.Resource
+import com.example.e_shop.core.util.AnimatedImageSlider
 import com.example.e_shop.core.util.CircularLoadingProgress
-import com.example.e_shop.core.util.ColorDropdown
-import com.example.e_shop.core.util.MyCarousel
+import com.example.e_shop.core.util.ColorPicker
 import com.example.e_shop.home.domain.model.Products
 import com.example.e_shop.home.presentation.home.vm.HomeViewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.HorizontalPagerIndicator
-import com.google.accompanist.pager.rememberPagerState
 import kotlin.text.split
 
 @OptIn(
@@ -134,8 +127,7 @@ fun SharedTransitionScope.DetailContent(
         product.productImages.pi3,
         product.productImages.pi4
     )
-    val count = remember { mutableIntStateOf(1) } // Start with 1 or 0 depending on your needs
-    val pagerState = rememberPagerState(initialPage = 0)
+    val count = remember { mutableIntStateOf(1) }
 
     val culture = remember { mutableSetOf<String>() }
     val color = product.colors.joinToString()
@@ -159,32 +151,12 @@ fun SharedTransitionScope.DetailContent(
                 .height(300.dp)
         ) {
             Column {
-                MyCarousel(
+                AnimatedImageSlider(
                     imageSlider = imageSlider,
                     modifier = Modifier
                         .height(290.dp)
                         .fillMaxWidth()
                 )
-//                HorizontalPager(
-//                    count = imageSlider.size,
-//                    state = pagerState,
-//                    modifier = Modifier
-//                        .height(290.dp)
-//                        .fillMaxWidth()
-//
-//                ) { page ->
-//                    ImageSlider(
-//                        images = imageSlider,
-//                        modifier = Modifier.fillMaxSize(),
-//                        animatedVisibilityScope = animatedVisibilityScope
-//                    )
-//                }
-//                HorizontalPagerIndicator(
-//                    pagerState = pagerState,
-//                    modifier = Modifier
-//                        .align(Alignment.CenterHorizontally)
-//                        .padding(16.dp)
-//                )
             }
         }
 
@@ -208,7 +180,7 @@ fun SharedTransitionScope.DetailContent(
                 ),
                 modifier = Modifier.padding(vertical = 16.dp)
             )
-            ColorDropdown(
+            ColorPicker(
                 colors = finalColorList,
                 selectedColor = selectedColor.value,
                 onColorSelected = { selectedColor.value = it }
@@ -265,9 +237,7 @@ fun SharedTransitionScope.DetailContent(
 fun QuantityUI(count: Int, onCountChange: (Int) -> Unit) {
     val buttonEnabled = remember { mutableStateOf(count > 0) }
 
-    LaunchedEffect(count) {
-        buttonEnabled.value = count > 0
-    }
+    LaunchedEffect(count) { buttonEnabled.value = count > 0 }
 
     Row(
         modifier = Modifier
@@ -318,7 +288,7 @@ private fun DetailsScreenTopAppBar(
     navController: NavHostController = rememberNavController()
 ) {
     TopAppBar(
-        title = { Text(text = "") },
+        title = {  },
         navigationIcon = {
             IconButton(
                 onClick = { navController.navigateUp() },
@@ -327,7 +297,7 @@ private fun DetailsScreenTopAppBar(
                     .clip(RoundedCornerShape(24.dp))
                     .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
-                Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back")
+                Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Navigate back")
             }
         },
         actions = {
@@ -342,72 +312,4 @@ private fun DetailsScreenTopAppBar(
             }
         }
     )
-}
-
-@OptIn(
-    ExperimentalPagerApi::class,
-    ExperimentalFoundationApi::class,
-    ExperimentalSharedTransitionApi::class
-)
-@Composable
-fun SharedTransitionScope.ImageSlider(
-    images: List<String?>,
-    modifier: Modifier = Modifier,
-    animatedVisibilityScope: AnimatedVisibilityScope
-) {
-    // Filter out null values and create a new list of non-null images
-    val validImages = images.filterNotNull()
-
-    // Handle the case where there are no valid images
-    if (validImages.isEmpty()) {
-        // Optionally show a placeholder or an empty state
-        Text("No images available", modifier = modifier)
-        return
-    }
-
-    val pagerState = rememberPagerState(initialPage = 0)
-
-    Box(modifier = modifier) {
-        HorizontalPager(
-            count = validImages.size,
-            state = pagerState,
-            key = { validImages[it] }
-        ) { index ->
-            SubcomposeAsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(validImages[index])
-                    .crossfade(true)
-                    .build(),
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .sharedElement(
-                        state = rememberSharedContentState(key = validImages[index]),
-                        animatedVisibilityScope = animatedVisibilityScope,
-                        boundsTransform = { initialRect, targetRect ->
-                            spring(
-                                dampingRatio = 0.8f,
-                                stiffness = 380f
-                            )
-                        }
-                    ),
-            )
-        }
-
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 16.dp)
-        ) {
-            HorizontalPagerIndicator(
-                pagerState = pagerState,
-                modifier = Modifier
-                    .padding(16.dp)
-                    .background(Color.Black.copy(alpha = 0.3f))
-                    .padding(horizontal = 8.dp, vertical = 3.dp),
-                activeColor = Color.White,
-                inactiveColor = Color.Gray
-            )
-        }
-    }
 }

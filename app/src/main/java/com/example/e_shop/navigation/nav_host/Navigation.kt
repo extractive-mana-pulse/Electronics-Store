@@ -33,14 +33,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.example.e_shop.catalog.presentation.CategoryProductsScreen
 import com.example.e_shop.catalog.presentation.CategoriesListScreen
+import com.example.e_shop.catalog.presentation.CategoryProductsScreen
 import com.example.e_shop.core.util.BottomNavigationBar
 import com.example.e_shop.core.util.items
 import com.example.e_shop.home.presentation.detail.DetailScreen
 import com.example.e_shop.home.presentation.home.screen.HomeScreen
 import com.example.e_shop.navigation.screens.Screens
 import com.example.e_shop.profile.presentation.ProfileScreen
+import com.example.e_shop.profile.presentation.SettingsPage
 import kotlinx.coroutines.launch
 
 @OptIn(
@@ -170,6 +171,9 @@ fun AppNavigation(
 
                     composable(Screens.Profile.route) {
                         ProfileScreen(navController = navController)
+                    }
+                    composable(Screens.Settings.route) {
+                        SettingsPage(navController = navController)
                     }
 
                     composable<Screens.Details>(
