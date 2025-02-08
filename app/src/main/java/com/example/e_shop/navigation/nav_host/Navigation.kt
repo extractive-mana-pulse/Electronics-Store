@@ -32,13 +32,19 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navigation
 import androidx.navigation.toRoute
-import com.example.e_shop.catalog.presentation.CategoriesListScreen
-import com.example.e_shop.catalog.presentation.CategoryProductsScreen
+import com.example.e_shop.catalog.presentation.screens.CategoriesListScreen
+//import com.example.e_shop.catalog.presentation.screens.CategoriesListScreen
+//import com.example.e_shop.catalog.presentation.screens.CategoryProductsScreen
 import com.example.e_shop.core.util.BottomNavigationBar
 import com.example.e_shop.core.util.items
 import com.example.e_shop.home.presentation.detail.DetailScreen
+//import com.example.e_shop.home.presentation.detail.DetailScreen
 import com.example.e_shop.home.presentation.home.screen.HomeScreen
+import com.example.e_shop.navigation.screens.AuthScreens
+import com.example.e_shop.navigation.screens.Graph
+import com.example.e_shop.navigation.screens.HomeScreens
 import com.example.e_shop.navigation.screens.Screens
 import com.example.e_shop.profile.presentation.ProfileScreen
 import com.example.e_shop.profile.presentation.SettingsPage
@@ -57,7 +63,7 @@ fun AppNavigation(
 //    val navDrawerTopAppBar = rememberSaveable { (mutableStateOf(true)) }
 
     when (navBackStackEntry?.destination?.route) {
-        Screens.Home.route -> {
+        HomeScreens.Home.route -> {
 //            navDrawerTopAppBar.value = true
             bottomBarState.value = true
         }
@@ -65,7 +71,7 @@ fun AppNavigation(
 //            navDrawerTopAppBar.value = false
             bottomBarState.value = true
         }
-        Screens.Category.route -> {
+        HomeScreens.Category.route -> {
             bottomBarState.value = true
         }
         else -> {
@@ -119,18 +125,6 @@ fun AppNavigation(
         drawerState = drawerState
     ) {
         Scaffold(
-//            topBar = {
-//                if (navDrawerTopAppBar.value) {
-//                    AnimatedVisibility(
-//                        visible = navDrawerTopAppBar.value,
-//                        enter = expandHorizontally() + fadeIn(),
-//                        exit = shrinkHorizontally() + fadeOut(),
-//                        content = {
-//                            SearchBarM3()
-//                        }
-//                    )
-//                }
-//            },
             bottomBar = {
                 BottomNavigationBar(
                     bottomBarState = bottomBarState,
@@ -138,67 +132,25 @@ fun AppNavigation(
                 )
             }
         ) { innerPadding ->
-
-            SharedTransitionLayout {
-                NavHost(
-                    navController = navController,
-                    startDestination = Screens.Home.route,
-                    modifier = Modifier.padding(
-                        start = innerPadding.calculateStartPadding(LayoutDirection.Ltr),
+            NavHost(
+                navController = navController,
+                startDestination = Graph.AUTH,
+                modifier = Modifier.padding(
+                    start = innerPadding.calculateStartPadding(LayoutDirection.Ltr),
 //                        top = if (navDrawerTopAppBar.value) innerPadding.calculateTopPadding() else 0.dp,
-                        end = innerPadding.calculateEndPadding(LayoutDirection.Ltr),
-                        bottom = if (bottomBarState.value) innerPadding.calculateBottomPadding() else 0.dp
-                    )
-                ) {
-                    composable(Screens.Home.route) {
-                        HomeScreen(
-                            navController = navController,
-                            animatedVisibilityScope = this
-                        )
-                    }
+                    end = innerPadding.calculateEndPadding(LayoutDirection.Ltr),
+                    bottom = if (bottomBarState.value) innerPadding.calculateBottomPadding() else 0.dp
+                )
+            ) {
+                authNavGraph(navController)
 
-                    composable(Screens.Category.route) {
-                        CategoriesListScreen(navController = navController)
-                    }
+                homeNavGraph(navController)
 
-                    composable<Screens.Catalog> {
-                        val argument = it.toRoute<Screens.Catalog>()
-                        CategoryProductsScreen(
-                            navController = navController,
-                            name = argument.name
-                        )
-                    }
-
-                    composable(Screens.Profile.route) {
-                        ProfileScreen(navController = navController)
-                    }
-                    composable(Screens.Settings.route) {
-                        SettingsPage(navController = navController)
-                    }
-
-                    composable<Screens.Details>(
-//                        typeMap = mapOf(
-//                            typeOf<Specifications>() to CustomNavType.specType,
-//                            typeOf<ProductImages>() to CustomNavType.picType
-//                        )
-                    ) {
-                        val argument = it.toRoute<Screens.Details>()
-                        DetailScreen(
-                            navController = navController,
-                            animatedVisibilityScope = this,
-                            id = argument.id,
-//                            id = argument.id,
-//                            name = argument.name,
-//                            price = argument.price,
-//                            image = argument.image,
-//                            description = argument.description,
-//                            specs = argument.specs,
-//                            category = argument.category,
-//                            productImages = argument.productImages,
-//                            features = argument.features,
-//                            colors = argument.colors
-                        )
-                    }
+                composable(Screens.Profile.route) {
+                    ProfileScreen(navController = navController)
+                }
+                composable(Screens.Settings.route) {
+                    SettingsPage(navController = navController)
                 }
             }
         }

@@ -2,8 +2,6 @@ package com.example.e_shop.home.data.local
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.example.e_shop.home.domain.model.ProductImages
-import com.example.e_shop.home.domain.model.Specifications
 import com.google.gson.annotations.SerializedName
 
 @Entity(tableName = "products")

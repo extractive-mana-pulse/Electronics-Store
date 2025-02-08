@@ -1,12 +1,5 @@
 package com.example.e_shop.home.presentation.home.screen
 
-import SearchBarM3
-import android.annotation.SuppressLint
-import android.util.Log
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,8 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -33,11 +24,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -49,34 +37,25 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil3.compose.AsyncImage
 import com.example.e_shop.R
-import com.example.e_shop.catalog.presentation.CatalogViewModel
-import com.example.e_shop.core.extensions.getCategoryInfo
 import com.example.e_shop.core.extensions.toastMessage
 import com.example.e_shop.core.resource.Resource
 import com.example.e_shop.core.util.CircularLoadingProgress
-import com.example.e_shop.home.domain.model.Products
-import com.example.e_shop.home.domain.model.Root
-import com.example.e_shop.home.presentation.home.vm.HomeViewModel
+import com.example.e_shop.core.util.SearchBarView
+import com.example.e_shop.home.domain.model.ProductItem
+import com.example.e_shop.home.presentation.vm.HomeViewModel
+import com.example.e_shop.navigation.screens.HomeScreens
 import com.example.e_shop.navigation.screens.Screens
-import kotlin.text.split
 
-@SuppressLint("AutoboxingStateCreation")
-@OptIn(
-    ExperimentalMaterial3Api::class,
-    ExperimentalSharedTransitionApi::class
-)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SharedTransitionScope.HomeScreen(
-    navController: NavController = rememberNavController(),
-    animatedVisibilityScope: AnimatedVisibilityScope,
+fun HomeScreen(
+    navController: NavController = rememberNavController()
 ) {
     val viewModel: HomeViewModel = hiltViewModel()
     val context = LocalContext.current
 
-    LaunchedEffect(true) { viewModel.getAllProducts() }
-
     Scaffold(
-        topBar = { SearchBarM3() }
+        topBar = { SearchBarView() }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -90,118 +69,133 @@ fun SharedTransitionScope.HomeScreen(
                     CircularLoadingProgress()
                 }
                 is Resource.Success -> {
-                    ProductItem(
-                        navController,
-                        viewModel,
-                        animatedVisibilityScope
-                    )
+                    // Assuming state.data is a List<ProductItem>
+                    val products = state.data
+                    products?.let { HeaderLayout(products = it, navController = navController) }
                 }
                 is Resource.Error -> {
-                    toastMessage(context = context, message = state.message ?: "An unknown error occurred",)
+                    toastMessage(context = context, message = state.message ?: "An unknown error occurred")
                 }
             }
         }
     }
 }
 
-@OptIn(
-    ExperimentalSharedTransitionApi::class,
-    ExperimentalMaterial3Api::class
-)
+//@Composable
+//fun ProductItem(
+//    navController: NavController = rememberNavController(),
+//    viewModel: HomeViewModel = hiltViewModel(),
+//    catalogViewModel: CatalogViewModel = hiltViewModel()
+//) {
+//    val stateCat by catalogViewModel.state.collectAsState()
+//    val state = viewModel.state.value
+//    val context = LocalContext.current
+//    val categories = remember(state) {
+//        val categorySet = mutableSetOf<String>()
+//        if (true) {
+//            state.data?.products?.forEach { product ->
+//                product.category?.split(",")?.forEach { category ->
+//                    categorySet.add(category.trim())
+//                }
+//            }
+//
+//        }
+//        categorySet
+//    }
+
+//    categories.forEach { category ->
+//        LaunchedEffect(Unit) {
+//            catalogViewModel.getSortedProductsByCategory(category)
+//        }
+//    }
+
+//    LazyColumn {
+        // all products
+//        item { HeaderLayout(state, navController) }
+        // all categories
+//        items(categories.toList()) { category ->
+//            Column(
+//                modifier = Modifier.fillMaxWidth(),
+//                horizontalAlignment = Alignment.CenterHorizontally
+//            ) {
+//                Row(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(16.dp),
+//                    verticalAlignment = Alignment.CenterVertically
+//                ) {
+//                    Text(
+//                        text = category,
+//                        fontSize = 20.sp,
+//                        fontWeight = FontWeight.Bold
+//                    )
+//                }
+//                ProductsSection(navController = navController)
+//            }
+//        }
+//    }
+//}
+
+//@Composable
+//fun ProductsSection(
+//    navController: NavController = rememberNavController()
+//) {
+//    val catalogViewModel: CatalogViewModel = hiltViewModel()
+//    val state = catalogViewModel.state.collectAsState()
+//    val context = LocalContext.current
+//
+//    val products = when (state.value) {
+//        is Resource.Success -> state.value.data?.products ?: emptyList()
+//        else -> emptyList()
+//    }
+//    Column(
+//        modifier = Modifier.fillMaxSize(),
+//        horizontalAlignment = Alignment.CenterHorizontally,
+//        verticalArrangement = Arrangement.Center
+//    ) {
+//        when (state.value) {
+//            is Resource.Loading -> { CircularLoadingProgress() }
+//            is Resource.Success -> { ProductsByCategory(navController = navController, products = products) }
+//            is Resource.Error -> {
+//                toastMessage(
+//                    context = context,
+//                    message = state.value.message ?: "An unknown error occurred"
+//                )
+//            }
+//        }
+//    }
+//}
+
+//@Composable
+//fun ProductsByCategory(
+//    navController: NavController = rememberNavController(),
+//    products: List<Products>
+//) {
+//    LazyRow {
+//        itemsIndexed(products) { index, product ->
+//            Card(
+//                modifier = Modifier
+//                    .width(250.dp)
+//                    .height(350.dp)
+//                    .padding(8.dp)
+//                    .clickable {
+//                        navController.navigate(
+//                            Screens.Details(
+//                                id = product._id
+//                            )
+//                        )
+//                    }
+//            ) { ItemUI(products = product) }
+//        }
+//        item { LastItem() }
+//    }
+//}
+
 @Composable
-fun SharedTransitionScope.ProductItem(
-    navController: NavController = rememberNavController(),
-    viewModel: HomeViewModel = hiltViewModel(),
-    animatedVisibilityScope: AnimatedVisibilityScope,
+private fun HeaderLayout(
+    products: List<ProductItem?>, // Changed to accept a list of ProductItem
+    navController: NavController = rememberNavController()
 ) {
-    val state = viewModel.state.value
-    val categories = remember(state) {
-        val categorySet = mutableSetOf<String>()
-        if (true) {
-            state.data?.products?.forEach { product ->
-                product.category?.split(",")?.forEach { category ->
-                    categorySet.add(category.trim())
-                }
-            }
-        }
-        categorySet
-    }
-
-    LazyColumn {
-        item {
-            ProductSection(
-                state,
-                navController,
-                animatedVisibilityScope
-            )
-        }
-        items(categories.toList()) { category ->
-            val categoryInfo = getCategoryInfo(category)
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    AsyncImage(
-                        model = categoryInfo.imageResource,
-                        contentDescription = "${categoryInfo.displayName} Image",
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .size(24.dp),
-                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant)
-                    )
-                    Text(
-                        text = categoryInfo.displayName,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
-                MobileSection(
-                    categoryInfo.displayName,
-                    navController,
-                    animatedVisibilityScope
-                )
-            }
-        }
-    }
-}
-
-@Composable
-@OptIn(ExperimentalSharedTransitionApi::class)
-fun SharedTransitionScope.MobileSection(
-    categoryName: String,
-    navController: NavController,
-    animatedVisibilityScope: AnimatedVisibilityScope,
-) {
-    val catalogViewModel : CatalogViewModel = hiltViewModel()
-    LaunchedEffect(true) { catalogViewModel.getSortedProductsByCategory(categoryName) }
-    val state1 = catalogViewModel.state.value
-    val context = LocalContext.current
-
-    Log.d("HomeScreen", "MobileSection: $categoryName")
-
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        // Todo: Implement all categories here.
-    }
-}
-
-@Composable
-@OptIn(ExperimentalSharedTransitionApi::class)
-private fun SharedTransitionScope.ProductSection(
-    state: Resource<Root>,
-    navController: NavController,
-    animatedVisibilityScope: AnimatedVisibilityScope,
-) {
-
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -220,72 +214,32 @@ private fun SharedTransitionScope.ProductSection(
                 fontWeight = FontWeight.Bold
             )
         }
-        LazyRow {
-            itemsIndexed(state.data?.products?.take(5) ?: emptyList()) { index, product ->
-                product.let {
-                    Card(
-                        modifier = Modifier
-                            .width(250.dp)
-                            .height(350.dp)
-                            .padding(8.dp)
-                            .clickable {
-                                navController.navigate(
-                                    Screens.Details(
-                                        id = it._id,
-                                    )
-                                )
-                            }
-                    ) {
-                        ItemUI(
-                            products = it,
-                            animatedVisibilityScope = animatedVisibilityScope,
-                        )
-                    }
-                }
-            }
-            item {
+
+        LazyColumn {
+            itemsIndexed(products) { index, product ->
                 Card(
                     modifier = Modifier
-                        .width(250.dp)
+                        .fillMaxWidth()
                         .height(350.dp)
                         .padding(8.dp)
                         .clickable {
-                            // Your custom click action
-//                            navController.navigate(Screens.AllProducts.route)
+                            navController.navigate(
+                                HomeScreens.Details(
+                                    id = product?.id ?: 0,
+                                )
+                            )
                         }
                 ) {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Default.ArrowForward,
-                            contentDescription = "See all",
-                            modifier = Modifier.size(48.dp)
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "See All Products",
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontFamily = FontFamily(
-                                    Font(R.font.gabarito_variable_font_wght)
-                            ),
-                            fontWeight = FontWeight.Bold
-                        ))
-                    }
+                    ItemUI(products = product)
                 }
             }
+            item { LastItem() }
         }
     }
 }
 
 @Composable
-@OptIn(ExperimentalSharedTransitionApi::class)
-private fun SharedTransitionScope.ItemUI(
-    products: Products,
-    animatedVisibilityScope: AnimatedVisibilityScope,
-) {
+private fun ItemUI(products: ProductItem?) {
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,
@@ -293,44 +247,70 @@ private fun SharedTransitionScope.ItemUI(
     ) {
 
         AsyncImage(
-            model = products.image,
-            contentDescription = products.name,
+            model = products?.image,
+            contentDescription = products?.title,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(250.dp)
                 .aspectRatio(16 / 9f)
                 .weight(1f)
-                .sharedElement(
-                    state = rememberSharedContentState(key = "${products.image}"),
-                    animatedVisibilityScope = animatedVisibilityScope,
-                    boundsTransform = { initialRect, targetRect ->
-                        spring(
-                            dampingRatio = 0.8f,
-                            stiffness = 380f
-                        )
-                    },
-                )
         )
+
         HorizontalDivider()
 
         Spacer(modifier = Modifier.height(4.dp))
 
         Text(
-            text = products.name ?: "",
+            text = products?.title.toString(),
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontFamily = FontFamily(Font(R.font.poppins_black)),
                 fontWeight = FontWeight.Light
             ),
             modifier = Modifier.fillMaxWidth()
         )
+
         Spacer(modifier = Modifier.height(4.dp))
+
         Text(
-            text = "$${products.price?.div(100).toString()}",
+            text = "$${products?.price?.div(100)}",
             style = MaterialTheme.typography.titleSmall.copy(
                 fontFamily = FontFamily(Font(R.font.gabarito_variable_font_wght)),
                 fontWeight = FontWeight.Bold
             ),
             modifier = Modifier.fillMaxWidth()
         )
+    }
+}
+
+@Composable
+private fun LastItem() {
+    Card(
+        modifier = Modifier
+            .width(250.dp)
+            .height(350.dp)
+            .padding(8.dp)
+            .clickable { TODO("Navigate to all products screen") }
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Default.ArrowForward,
+                contentDescription = "See all",
+                modifier = Modifier.size(48.dp)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "See All Products",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontFamily = FontFamily(
+                        Font(R.font.gabarito_variable_font_wght)
+                    ),
+                    fontWeight = FontWeight.Bold
+                )
+            )
+        }
     }
 }

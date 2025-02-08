@@ -1,12 +1,5 @@
 pluginManagement {
     repositories {
-        google {
-            content {
-                includeGroupByRegex("com\\.android.*")
-                includeGroupByRegex("com\\.google.*")
-                includeGroupByRegex("androidx.*")
-            }
-        }
         mavenCentral()
         maven {
             url = uri("https://company/com/maven2")
@@ -16,6 +9,13 @@ pluginManagement {
             dirs("libs")
         }
         gradlePluginPortal()
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
     }
 }
 dependencyResolutionManagement {

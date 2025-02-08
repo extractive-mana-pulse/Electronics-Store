@@ -1,12 +1,12 @@
 package com.example.e_shop.home.domain.repository
 
-import com.example.e_shop.home.domain.model.Root
+import com.example.e_shop.home.domain.model.ProductItem
 
 interface ShopRepository {
 
-    suspend fun getAllProducts() : Root
+    suspend fun getAllProducts() : List<ProductItem>
 
-    suspend fun getProductById(productId: String): Root
-
-    suspend fun getSortedProductsByCategory(category: String): Root
+    suspend fun getProductById(productId: Int): ProductItem
+//
+//    suspend fun getSortedProductsByCategory(category: String): Root
 }

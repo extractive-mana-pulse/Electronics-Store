@@ -28,6 +28,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.e_shop.navigation.screens.HomeScreens
 import com.example.e_shop.navigation.screens.Screens
 
 data class BottomNavigationItem<T:Any>(
@@ -54,14 +55,14 @@ fun BottomNavigationBar(
             selectedIcon = Icons.Filled.Home,
             unselectedIcon = Icons.Outlined.Home,
             hasNews = false,
-            route = Screens.Home.route
+            route = HomeScreens.Home.route
         ),
         BottomNavigationItem(
             title = "Catalog",
             selectedIcon = Icons.Filled.Menu,
             unselectedIcon = Icons.Outlined.Menu,
             hasNews = false,
-            route = Screens.Category.route
+            route = HomeScreens.Category.route
         ),
         BottomNavigationItem(
             title = "Profile",

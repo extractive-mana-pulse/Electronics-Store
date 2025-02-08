@@ -1,15 +1,10 @@
 package com.example.e_shop.home.presentation.detail
 
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,9 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -30,7 +23,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
@@ -41,193 +33,153 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import coil3.compose.AsyncImage
 import com.example.e_shop.R
 import com.example.e_shop.core.extensions.toastMessage
 import com.example.e_shop.core.resource.Resource
-import com.example.e_shop.core.util.AnimatedImageSlider
 import com.example.e_shop.core.util.CircularLoadingProgress
-import com.example.e_shop.core.util.ColorPicker
-import com.example.e_shop.home.domain.model.Products
-import com.example.e_shop.home.presentation.home.vm.HomeViewModel
+import com.example.e_shop.core.util.DetailsScreenTopAppBar
+import com.example.e_shop.home.domain.model.ProductItem
+import com.example.e_shop.home.presentation.vm.HomeViewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
-import kotlin.text.split
 
 @OptIn(
     ExperimentalPagerApi::class,
     ExperimentalMaterial3Api::class,
-    ExperimentalSharedTransitionApi::class,
 )
 @Composable
-fun SharedTransitionScope.DetailScreen(
+fun DetailScreen(
     navController: NavHostController = rememberNavController(),
-    id: String,
-    animatedVisibilityScope: AnimatedVisibilityScope,
+    id: Int
 ) {
     val viewModel: HomeViewModel = hiltViewModel()
     val context = LocalContext.current
-    val state = viewModel.state2.value
+    val state = viewModel.productById.value
 
     LaunchedEffect(Unit) { viewModel.getProductById(id) }
 
     Scaffold(
         topBar = {
-            DetailsScreenTopAppBar(navController)
+            DetailsScreenTopAppBar(
+                navController = navController
+            )
         }
     ) { paddingValues ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(paddingValues),
+            modifier = Modifier.padding(paddingValues).fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             when (state) {
-                is Resource.Error -> {
-                    toastMessage(
-                        context = context,
-                        message = state.message ?: "An unexpected error occurred"
-                    )
-                }
-                is Resource.Loading -> {
-                    CircularLoadingProgress()
-                }
-                is Resource.Success -> {
-                    val root = state.data
-                    val product = root?.products?.find { it._id == id }
-                    if (product != null) {
-                        DetailContent(
-                            product = product,
-                            animatedVisibilityScope = animatedVisibilityScope
-                        )
-                    }
-                }
+                is Resource.Error -> toastMessage(context, state.message ?: "An unexpected error occurred")
+                is Resource.Loading -> CircularLoadingProgress()
+                is Resource.Success -> if (state.data != null) DetailContent(state.data) else toastMessage(context, "Product not found")
             }
         }
     }
 }
+
 @OptIn(
     ExperimentalMaterial3Api::class,
     ExperimentalPagerApi::class,
-    ExperimentalSharedTransitionApi::class
 )
 @Composable
-fun SharedTransitionScope.DetailContent(
-    product: Products,
-    animatedVisibilityScope: AnimatedVisibilityScope
-) {
-    val imageSlider = listOf(
-        product.productImages.pi1,
-        product.productImages.pi2,
-        product.productImages.pi3,
-        product.productImages.pi4
-    )
+fun DetailContent(product: ProductItem) {
+
     val count = remember { mutableIntStateOf(1) }
 
-    val culture = remember { mutableSetOf<String>() }
-    val color = product.colors.joinToString()
-    color.split(",").map { it.trim() }.forEach { culture.add(it) }
-
-    val finalColorList = culture.toList()
-    val selectedColor = remember { mutableStateOf(finalColorList.firstOrNull() ?: "") }
-
-    val finalPrice = product.price?.div(100) ?: 0
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .statusBarsPadding()
-            .safeDrawingPadding()
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.BottomCenter,
     ) {
-        Box(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(300.dp)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .statusBarsPadding()
+                .safeDrawingPadding()
         ) {
-            Column {
-                AnimatedImageSlider(
-                    imageSlider = imageSlider,
-                    modifier = Modifier
-                        .height(290.dp)
-                        .fillMaxWidth()
+            Box(modifier = Modifier.fillMaxWidth().height(300.dp)) {
+                AsyncImage(
+                    model = product.image,
+                    contentDescription = product.title,
+                    modifier = Modifier.fillMaxSize().height(300.dp)
+                )
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = product.title,
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontFamily = FontFamily(Font(R.font.gabarito_bold)),
+                    ),
+                )
+                Text(
+                    text = "$${product.price}$",
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        fontFamily = FontFamily(Font(R.font.gabarito_variable_font_wght)),
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    ),
+                    modifier = Modifier.padding(vertical = 16.dp)
+                )
+                QuantityUI(
+                    count = count.intValue,
+                    onCountChange = { count.intValue = it }
+                )
+                Text(
+                    text = product.description,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontFamily = FontFamily(Font(R.font.poppins_light)),
+                        fontWeight = FontWeight.Normal
+                    ),
+                    modifier = Modifier.padding(vertical = 8.dp)
                 )
             }
         }
-
-        Column(
+        Button(
+            onClick = { TODO("Add to cart logic") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
+                .clip(RoundedCornerShape(24.dp))
+                .align(Alignment.BottomCenter)
         ) {
-            Text(
-                text = product.name ?: "",
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontFamily = FontFamily(Font(R.font.gabarito_bold)),
-                ),
-            )
-            Text(
-                text = "$${finalPrice}$",
-                style = MaterialTheme.typography.headlineSmall.copy(
-                    fontFamily = FontFamily(Font(R.font.gabarito_variable_font_wght)),
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                ),
-                modifier = Modifier.padding(vertical = 16.dp)
-            )
-            ColorPicker(
-                colors = finalColorList,
-                selectedColor = selectedColor.value,
-                onColorSelected = { selectedColor.value = it }
-            )
-            QuantityUI(count = count.intValue, onCountChange = { count.intValue = it })
-            Text(
-                text = product.description ?: "",
-                style = MaterialTheme.typography.bodySmall.copy(
-                    fontFamily = FontFamily(Font(R.font.poppins_light)),
-                    fontWeight = FontWeight.Normal
-                ),
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-            Text(
-                text = product.specifications.toString(),
-                modifier = Modifier.padding(vertical = 8.dp),
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            Button(
-                onClick = { /*TODO: Handle add to cart logic*/ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp)
-                    .clip(RoundedCornerShape(24.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Bottom
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "$${finalPrice * count.intValue}",
-                        modifier = Modifier.padding(16.dp),
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            fontFamily = FontFamily(Font(R.font.gabarito_bold)),
-                            fontSize = 18.sp
-                        )
+                Text(
+                    text = "$${product.price * count.intValue}",
+                    modifier = Modifier.padding(16.dp),
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontFamily = FontFamily(Font(R.font.gabarito_bold)),
+                        fontSize = 18.sp
                     )
-                    Text(
-                        text = "Add to Bag",
-                        modifier = Modifier.padding(16.dp),
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            fontFamily = FontFamily(Font(R.font.poppins_light)),
-                            fontSize = 18.sp
-                        )
+                )
+                Text(
+                    text = stringResource(R.string.add_to_bag),
+                    modifier = Modifier.padding(16.dp),
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontFamily = FontFamily(Font(R.font.poppins_light)),
+                        fontSize = 18.sp
                     )
-                }
+                )
             }
         }
     }
@@ -235,8 +187,8 @@ fun SharedTransitionScope.DetailContent(
 
 @Composable
 fun QuantityUI(count: Int, onCountChange: (Int) -> Unit) {
-    val buttonEnabled = remember { mutableStateOf(count > 0) }
 
+    val buttonEnabled = remember { mutableStateOf(count > 0) }
     LaunchedEffect(count) { buttonEnabled.value = count > 0 }
 
     Row(
@@ -281,35 +233,4 @@ fun QuantityUI(count: Int, onCountChange: (Int) -> Unit) {
             )
         }
     }
-}
-@Composable
-@OptIn(ExperimentalMaterial3Api::class)
-private fun DetailsScreenTopAppBar(
-    navController: NavHostController = rememberNavController()
-) {
-    TopAppBar(
-        title = {  },
-        navigationIcon = {
-            IconButton(
-                onClick = { navController.navigateUp() },
-                modifier = Modifier
-                    .padding(16.dp)
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-            ) {
-                Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Navigate back")
-            }
-        },
-        actions = {
-            IconButton(
-                onClick = { /** TODO: Handle favorite button click */ },
-                modifier = Modifier
-                    .padding(16.dp)
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-            ) {
-                Icon(Icons.Default.FavoriteBorder, contentDescription = "Favorite")
-            }
-        }
-    )
 }

@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
-    id ("kotlin-kapt")
+    id("com.google.devtools.ksp") version "1.9.22-1.0.17"
     id ("dagger.hilt.android.plugin")
 }
 
@@ -25,7 +25,7 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "BASE_URL", "\"https://e-shop-api-steel.vercel.app/\"")
+            buildConfigField("String", "BASE_URL", "\"https://fakestoreapi.com/\"")
         }
         release {
             /* this 2 block of code, prepare application for release.
@@ -33,7 +33,7 @@ android {
             isShrinkResources = true
             isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            buildConfigField("String", "BASE_URL", "\"https://e-shop-api-steel.vercel.app/\"")
+            buildConfigField("String", "BASE_URL", "\"https://fakestoreapi.com/\"")
         }
     }
     compileOptions {
@@ -50,9 +50,7 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.7"
     }
-    kapt {
-        correctErrorTypes = true
-    }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -80,7 +78,7 @@ dependencies {
 
     // type-safe navigation
     implementation(libs.navigation.compose)
-    implementation(libs.kotlinx.serialization.json)
+//    implementation(libs.kotlinx.serialization.json)
 
     // bottom bar
     implementation (libs.androidx.material)
@@ -97,10 +95,9 @@ dependencies {
     implementation (libs.androidx.lifecycle.viewmodel.compose)
     implementation (libs.androidx.lifecycle.livedata.ktx)
 
-    // di
-    kapt (libs.androidx.hilt.compiler)
-    kapt (libs.hilt.android.compiler)
-    implementation (libs.hilt.android)
+    implementation("com.google.dagger:hilt-android:2.51.1")
+    ksp("com.google.dagger:hilt-android-compiler:2.51.1")
+    ksp("com.google.dagger:hilt-compiler:2.51.1")
     implementation(libs.androidx.hilt.navigation.compose)
 
     // coil
@@ -111,7 +108,9 @@ dependencies {
     implementation(libs.androidx.compose.animation)
 
     // serialization
-    implementation(libs.kotlinx.serialization.json)
+//    implementation(libs.kotlinx.serialization.json)
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
 
     // image slider
     implementation (libs.accompanist.pager)
@@ -119,11 +118,12 @@ dependencies {
 
     // room
     implementation (libs.androidx.room.ktx)
-    // noinspection KaptUsageInsteadOfKsp
-    kapt (libs.androidx.room.compiler)
     implementation (libs.androidx.room.paging)
 
     // paging
     implementation (libs.androidx.paging.runtime.ktx)
     implementation (libs.androidx.paging.compose)
+
+    // splash screen
+    implementation(libs.androidx.core.splashscreen)
 }
