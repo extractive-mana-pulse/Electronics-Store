@@ -5,7 +5,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
-import com.example.e_shop.catalog.presentation.screens.CategoriesListScreen
+import com.example.e_shop.catalog.presentation.screens.CatalogScreen
+import com.example.e_shop.catalog.presentation.screens.CategoryProductsScreen
 import com.example.e_shop.home.presentation.detail.DetailScreen
 import com.example.e_shop.home.presentation.home.screen.HomeScreen
 import com.example.e_shop.navigation.screens.Graph
@@ -20,16 +21,16 @@ fun NavGraphBuilder.homeNavGraph(navController: NavHostController) {
             HomeScreen(navController = navController)
         }
 
-        composable(HomeScreens.Category.route) {
-            CategoriesListScreen(navController = navController)
+        composable(HomeScreens.Catalog.route) {
+            CatalogScreen(navController = navController)
         }
 
-        composable<HomeScreens.Catalog> {
-            val argument = it.toRoute<HomeScreens.Catalog>()
-//                        CategoryProductsScreen(
-//                            navController = navController,
-//                            name = argument.name
-//                        )
+        composable<HomeScreens.Category> {
+            val argument = it.toRoute<HomeScreens.Category>()
+            CategoryProductsScreen(
+                navController = navController,
+                name = argument.name
+            )
         }
 
         composable<HomeScreens.Details>(

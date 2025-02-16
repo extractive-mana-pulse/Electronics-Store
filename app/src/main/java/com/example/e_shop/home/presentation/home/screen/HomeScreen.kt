@@ -3,9 +3,7 @@ package com.example.e_shop.home.presentation.home.screen
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -13,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -31,12 +30,13 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil3.compose.AsyncImage
 import com.example.e_shop.R
+import com.example.e_shop.catalog.presentation.vm.CatalogViewModel
 import com.example.e_shop.core.extensions.toastMessage
 import com.example.e_shop.core.resource.Resource
 import com.example.e_shop.core.util.CircularLoadingProgress
@@ -44,7 +44,7 @@ import com.example.e_shop.core.util.SearchBarView
 import com.example.e_shop.home.domain.model.ProductItem
 import com.example.e_shop.home.presentation.vm.HomeViewModel
 import com.example.e_shop.navigation.screens.HomeScreens
-import com.example.e_shop.navigation.screens.Screens
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,162 +65,112 @@ fun HomeScreen(
             verticalArrangement = Arrangement.Top
         ) {
             when (val state = viewModel.state.value) {
-                is Resource.Loading -> {
-                    CircularLoadingProgress()
-                }
+                is Resource.Loading -> CircularLoadingProgress()
                 is Resource.Success -> {
-                    // Assuming state.data is a List<ProductItem>
                     val products = state.data
-                    products?.let { HeaderLayout(products = it, navController = navController) }
+                    products?.let {
+                        HeaderLayout(
+                            products = it,
+                            navController = navController
+                        )
+                    }
                 }
                 is Resource.Error -> {
-                    toastMessage(context = context, message = state.message ?: "An unknown error occurred")
+                    toastMessage(
+                        context = context,
+                        message = state.message ?: "An unknown error occurred"
+                    )
                 }
             }
         }
     }
 }
 
-//@Composable
-//fun ProductItem(
-//    navController: NavController = rememberNavController(),
-//    viewModel: HomeViewModel = hiltViewModel(),
-//    catalogViewModel: CatalogViewModel = hiltViewModel()
-//) {
-//    val stateCat by catalogViewModel.state.collectAsState()
-//    val state = viewModel.state.value
-//    val context = LocalContext.current
-//    val categories = remember(state) {
-//        val categorySet = mutableSetOf<String>()
-//        if (true) {
-//            state.data?.products?.forEach { product ->
-//                product.category?.split(",")?.forEach { category ->
-//                    categorySet.add(category.trim())
-//                }
-//            }
-//
-//        }
-//        categorySet
-//    }
-
-//    categories.forEach { category ->
-//        LaunchedEffect(Unit) {
-//            catalogViewModel.getSortedProductsByCategory(category)
-//        }
-//    }
-
-//    LazyColumn {
-        // all products
-//        item { HeaderLayout(state, navController) }
-        // all categories
-//        items(categories.toList()) { category ->
-//            Column(
-//                modifier = Modifier.fillMaxWidth(),
-//                horizontalAlignment = Alignment.CenterHorizontally
-//            ) {
-//                Row(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(16.dp),
-//                    verticalAlignment = Alignment.CenterVertically
-//                ) {
-//                    Text(
-//                        text = category,
-//                        fontSize = 20.sp,
-//                        fontWeight = FontWeight.Bold
-//                    )
-//                }
-//                ProductsSection(navController = navController)
-//            }
-//        }
-//    }
-//}
-
-//@Composable
-//fun ProductsSection(
-//    navController: NavController = rememberNavController()
-//) {
-//    val catalogViewModel: CatalogViewModel = hiltViewModel()
-//    val state = catalogViewModel.state.collectAsState()
-//    val context = LocalContext.current
-//
-//    val products = when (state.value) {
-//        is Resource.Success -> state.value.data?.products ?: emptyList()
-//        else -> emptyList()
-//    }
-//    Column(
-//        modifier = Modifier.fillMaxSize(),
-//        horizontalAlignment = Alignment.CenterHorizontally,
-//        verticalArrangement = Arrangement.Center
-//    ) {
-//        when (state.value) {
-//            is Resource.Loading -> { CircularLoadingProgress() }
-//            is Resource.Success -> { ProductsByCategory(navController = navController, products = products) }
-//            is Resource.Error -> {
-//                toastMessage(
-//                    context = context,
-//                    message = state.value.message ?: "An unknown error occurred"
-//                )
-//            }
-//        }
-//    }
-//}
-
-//@Composable
-//fun ProductsByCategory(
-//    navController: NavController = rememberNavController(),
-//    products: List<Products>
-//) {
-//    LazyRow {
-//        itemsIndexed(products) { index, product ->
-//            Card(
-//                modifier = Modifier
-//                    .width(250.dp)
-//                    .height(350.dp)
-//                    .padding(8.dp)
-//                    .clickable {
-//                        navController.navigate(
-//                            Screens.Details(
-//                                id = product._id
-//                            )
-//                        )
-//                    }
-//            ) { ItemUI(products = product) }
-//        }
-//        item { LastItem() }
-//    }
-//}
-
 @Composable
 private fun HeaderLayout(
-    products: List<ProductItem?>, // Changed to accept a list of ProductItem
+    products: List<ProductItem?>,
     navController: NavController = rememberNavController()
 ) {
-    Column(
+
+    LazyColumn(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Top
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "All products",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
+        item {  }
+        item {
+            Sections(
+                products,
+                navController
             )
         }
+    }
+}
 
-        LazyColumn {
-            itemsIndexed(products) { index, product ->
+@Composable
+private fun Sections(
+    products: List<ProductItem?>,
+    navController: NavController
+) {
+    val context = LocalContext.current
+    val categoryViewModel: CatalogViewModel = hiltViewModel()
+    val categoriesState = categoryViewModel.state.collectAsStateWithLifecycle()
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        when (val result = categoriesState.value) {
+            is Resource.Loading -> CircularLoadingProgress()
+            is Resource.Error -> {
+                toastMessage(
+                    context = context,
+                    message = result.message ?: "An unknown error occurred"
+                )
+            }
+            is Resource.Success -> {
+                val categories = result.data?: emptyList()
+                categories.forEach { category ->
+                    CategorySection(
+                        category = category,
+                        products = products.filter { it?.category == category },
+                        navController = navController
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CategorySection(
+    category: String,
+    products: List<ProductItem?>,
+    navController: NavController
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = category.replaceFirstChar {
+                if (it.isLowerCase())
+                    it.titlecase(Locale.getDefault())
+                else
+                    it.toString()
+            },
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontFamily = FontFamily(Font(R.font.gabarito_bold))
+            )
+        )
+        LazyRow {
+            itemsIndexed(products.take(5)) { index, product ->
                 Card(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(350.dp)
+                        .width(200.dp)
+                        .height(320.dp)
                         .padding(8.dp)
                         .clickable {
                             navController.navigate(
@@ -233,27 +183,27 @@ private fun HeaderLayout(
                     ItemUI(products = product)
                 }
             }
-            item { LastItem() }
+            if (products.size > 5) {
+                item { LastItem() }
+            }
         }
     }
 }
 
 @Composable
 private fun ItemUI(products: ProductItem?) {
+
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,
-        modifier = Modifier.padding(8.dp)
     ) {
-
         AsyncImage(
             model = products?.image,
             contentDescription = products?.title,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(250.dp)
-                .aspectRatio(16 / 9f)
-                .weight(1f)
+                .height(210.dp)
+                .padding(bottom = 4.dp)
         )
 
         HorizontalDivider()
@@ -261,35 +211,43 @@ private fun ItemUI(products: ProductItem?) {
         Spacer(modifier = Modifier.height(4.dp))
 
         Text(
-            text = products?.title.toString(),
+            text = products?.title ?: "Product title not found!",
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontFamily = FontFamily(Font(R.font.poppins_black)),
                 fontWeight = FontWeight.Light
             ),
-            modifier = Modifier.fillMaxWidth()
+            maxLines = 2,
+            modifier = Modifier.fillMaxWidth().padding(8.dp)
         )
 
         Spacer(modifier = Modifier.height(4.dp))
 
         Text(
-            text = "$${products?.price?.div(100)}",
+            text = "$${products?.price ?: 0}",
             style = MaterialTheme.typography.titleSmall.copy(
                 fontFamily = FontFamily(Font(R.font.gabarito_variable_font_wght)),
                 fontWeight = FontWeight.Bold
             ),
-            modifier = Modifier.fillMaxWidth()
+            maxLines = 1,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
         )
     }
 }
 
 @Composable
 private fun LastItem() {
+    val context = LocalContext.current
     Card(
         modifier = Modifier
             .width(250.dp)
-            .height(350.dp)
+            .height(320.dp)
             .padding(8.dp)
-            .clickable { TODO("Navigate to all products screen") }
+            .clickable {
+                toastMessage(
+                    context = context,
+                    message = "Implement logic to navigate a screen with corresponding products"
+                )
+            }
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -303,7 +261,7 @@ private fun LastItem() {
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "See All Products",
+                text = "See all",
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontFamily = FontFamily(
                         Font(R.font.gabarito_variable_font_wght)

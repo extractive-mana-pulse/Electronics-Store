@@ -62,7 +62,7 @@ fun BottomNavigationBar(
             selectedIcon = Icons.Filled.Menu,
             unselectedIcon = Icons.Outlined.Menu,
             hasNews = false,
-            route = HomeScreens.Category.route
+            route = HomeScreens.Catalog.route
         ),
         BottomNavigationItem(
             title = "Profile",

@@ -1,6 +1,5 @@
 package com.example.e_shop.profile.presentation
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +24,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,22 +33,28 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil3.compose.AsyncImage
 import com.example.e_shop.R
+import com.example.e_shop.auth.domain.model.UserData
+import com.example.e_shop.auth.presentation.GoogleAuthUiClient
 import com.example.e_shop.core.extensions.toastMessage
+import com.example.e_shop.navigation.screens.Graph
 import com.example.e_shop.navigation.screens.Screens
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun ProfileScreen(
-    navController: NavController = rememberNavController()
+    navController: NavController = rememberNavController(),
+    userData: UserData?,
+    googleAuthUiClient: GoogleAuthUiClient
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     Scaffold()
     { paddingValues ->
         Box(
@@ -59,8 +65,8 @@ fun ProfileScreen(
             Column(
                 modifier = Modifier.fillMaxSize()
             ) {
-                Image(
-                    imageVector = ImageVector.vectorResource(R.drawable.ic_launcher_foreground),
+                AsyncImage(
+                    model = userData?.profilePictureUrl,
                     contentDescription = null,
                     modifier = Modifier
                         .size(115.dp)
@@ -86,7 +92,7 @@ fun ProfileScreen(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "John Doe",
+                            text = userData?.username ?: "Shop User",
                             modifier = Modifier,
                             style = MaterialTheme.typography.headlineMedium.copy(
                                 fontFamily = FontFamily(Font(R.font.gabarito_bold)),
@@ -107,6 +113,7 @@ fun ProfileScreen(
                         modifier = Modifier
                             .padding(16.dp)
                             .clickable {
+                                TODO("Need to properly handle logic of navigation to edit profile page!")
                                 toastMessage(
                                     context = context,
                                     message = "Edit profile page"
@@ -199,10 +206,7 @@ fun ProfileScreen(
                         .clip(RoundedCornerShape(8.dp))
                         .background(MaterialTheme.colorScheme.surfaceVariant),
                     onClick = {
-                        toastMessage(
-                            context = context,
-                            message = "Payment page"
-                        )
+                        navController.navigate(Screens.Payment.route)
                     }
                 )
                 ProfilePageItem(
@@ -221,10 +225,14 @@ fun ProfileScreen(
                 )
                 TextButton(
                     onClick = {
-                        toastMessage(
-                            context = context,
-                            message = "Signed out"
-                        )
+                        scope.launch {
+                            googleAuthUiClient.signOut()
+                            toastMessage(
+                                context = context,
+                                message = "Signed out successfully"
+                            )
+                            navController.navigate(Graph.AUTH)
+                        }
                     },
                     modifier = Modifier.fillMaxWidth().padding(16.dp),
                     content = {

@@ -1,7 +1,6 @@
 package com.example.e_shop.navigation.nav_host
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -32,20 +31,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navigation
-import androidx.navigation.toRoute
-import com.example.e_shop.catalog.presentation.screens.CategoriesListScreen
+import com.example.e_shop.auth.presentation.GoogleAuthUiClient
 //import com.example.e_shop.catalog.presentation.screens.CategoriesListScreen
 //import com.example.e_shop.catalog.presentation.screens.CategoryProductsScreen
 import com.example.e_shop.core.util.BottomNavigationBar
 import com.example.e_shop.core.util.items
-import com.example.e_shop.home.presentation.detail.DetailScreen
 //import com.example.e_shop.home.presentation.detail.DetailScreen
-import com.example.e_shop.home.presentation.home.screen.HomeScreen
-import com.example.e_shop.navigation.screens.AuthScreens
 import com.example.e_shop.navigation.screens.Graph
 import com.example.e_shop.navigation.screens.HomeScreens
 import com.example.e_shop.navigation.screens.Screens
+import com.example.e_shop.profile.presentation.AddPaymentScreen
+import com.example.e_shop.profile.presentation.PaymentScreen
 import com.example.e_shop.profile.presentation.ProfileScreen
 import com.example.e_shop.profile.presentation.SettingsPage
 import kotlinx.coroutines.launch
@@ -56,7 +52,8 @@ import kotlinx.coroutines.launch
 )
 @Composable
 fun AppNavigation(
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    googleAuthUiClient: GoogleAuthUiClient
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val bottomBarState = rememberSaveable { (mutableStateOf(true)) }
@@ -71,7 +68,7 @@ fun AppNavigation(
 //            navDrawerTopAppBar.value = false
             bottomBarState.value = true
         }
-        HomeScreens.Category.route -> {
+        HomeScreens.Catalog.route -> {
             bottomBarState.value = true
         }
         else -> {
@@ -80,9 +77,9 @@ fun AppNavigation(
         }
     }
 
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var selectedItemIndex by rememberSaveable { mutableIntStateOf(0) }
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
     val drawerGestureEnabled = navBackStackEntry?.destination?.route in listOf("")
 
@@ -142,12 +139,25 @@ fun AppNavigation(
                     bottom = if (bottomBarState.value) innerPadding.calculateBottomPadding() else 0.dp
                 )
             ) {
-                authNavGraph(navController)
+                authNavGraph(
+                    navController,
+                    googleAuthUiClient
+                )
 
                 homeNavGraph(navController)
 
                 composable(Screens.Profile.route) {
-                    ProfileScreen(navController = navController)
+                    ProfileScreen(
+                        navController = navController,
+                        userData = googleAuthUiClient.getSignedInUser(),
+                        googleAuthUiClient = googleAuthUiClient
+                    )
+                }
+                composable(Screens.Payment.route) {
+                    PaymentScreen(navController = navController)
+                }
+                composable(Screens.AddPayment.route) {
+                    AddPaymentScreen(navController = navController)
                 }
                 composable(Screens.Settings.route) {
                     SettingsPage(navController = navController)

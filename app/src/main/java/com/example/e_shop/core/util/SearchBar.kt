@@ -1,5 +1,10 @@
 package com.example.e_shop.core.util
 
+import android.app.Activity
+import android.content.Intent
+import android.speech.RecognizerIntent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -27,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.e_shop.R
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,6 +40,19 @@ fun SearchBarView() {
     var query by remember { mutableStateOf("") }
     var active by remember { mutableStateOf(false) }
     var searchHistory = remember { mutableStateListOf<String>() }
+
+    val speechRecognizerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data: Intent? = result.data
+            val spokenText: String? =
+                data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.get(0)
+            if (spokenText != null) {
+                query = spokenText
+            }
+        }
+    }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -43,7 +62,7 @@ fun SearchBarView() {
         SearchBar(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(if (active) 0.dp else 16.dp), // Remove padding when active
+                .padding(if (active) 0.dp else 16.dp),
             query = query,
             onQueryChange = { query = it },
             onSearch = { newQuery ->
@@ -61,14 +80,31 @@ fun SearchBarView() {
             },
             trailingIcon = {
                 Row {
-                    IconButton(onClick = { TODO("Add voice search") }) {
-                        Icon(painter = painterResource(R.drawable.mic), contentDescription = "Microphone icon")
-                    }
                     if (active) {
-                        IconButton(
-                            onClick = { if (query.isNotEmpty()) query = "" else active = false }
-                        ) {
-                            Icon(imageVector = Icons.Filled.Close, contentDescription = "Close")
+                        if (query.isEmpty()) {
+                            IconButton(onClick = {
+                                val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                                    putExtra(
+                                        RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                                        RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+                                    )
+                                    putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
+                                    putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak to search...")
+                                }
+                                speechRecognizerLauncher.launch(intent)
+                            }) {
+                                Icon(painter = painterResource(R.drawable.mic), contentDescription = "Microphone icon")
+                            }
+                        } else {
+                            IconButton(
+                                onClick = {
+                                    query = ""
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close, contentDescription = "Clear search"
+                                )
+                            }
                         }
                     }
                 }

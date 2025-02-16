@@ -2,8 +2,10 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
-    id("com.google.devtools.ksp") version "1.9.22-1.0.17"
+    id("com.google.devtools.ksp") version "2.1.0-1.0.29"
     id ("dagger.hilt.android.plugin")
+    id ("com.google.gms.google-services")
+    id("org.jetbrains.kotlin.plugin.compose") version "2.1.10"
 }
 
 android {
@@ -47,9 +49,6 @@ android {
         compose = true
         buildConfig = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.7"
-    }
 
     packaging {
         resources {
@@ -57,6 +56,12 @@ android {
         }
     }
 }
+
+composeCompiler {
+    reportsDestination = layout.buildDirectory.dir("compose_compiler")
+    stabilityConfigurationFile = rootProject.layout.projectDirectory.file("stability_config.conf")
+}
+
 
 dependencies {
 
@@ -68,6 +73,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.firebase.auth)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -78,7 +84,6 @@ dependencies {
 
     // type-safe navigation
     implementation(libs.navigation.compose)
-//    implementation(libs.kotlinx.serialization.json)
 
     // bottom bar
     implementation (libs.androidx.material)
@@ -95,9 +100,9 @@ dependencies {
     implementation (libs.androidx.lifecycle.viewmodel.compose)
     implementation (libs.androidx.lifecycle.livedata.ktx)
 
-    implementation("com.google.dagger:hilt-android:2.51.1")
-    ksp("com.google.dagger:hilt-android-compiler:2.51.1")
-    ksp("com.google.dagger:hilt-compiler:2.51.1")
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
+    ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
     // coil
@@ -108,9 +113,7 @@ dependencies {
     implementation(libs.androidx.compose.animation)
 
     // serialization
-//    implementation(libs.kotlinx.serialization.json)
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+    implementation(libs.kotlinx.serialization.core)
 
     // image slider
     implementation (libs.accompanist.pager)
@@ -126,4 +129,11 @@ dependencies {
 
     // splash screen
     implementation(libs.androidx.core.splashscreen)
+
+    // firebase
+    implementation (libs.firebase.auth.ktx)
+    implementation (libs.play.services.auth)
+
+    // credential manager
+    implementation("androidx.credentials:credentials:1.5.0-rc01")
 }

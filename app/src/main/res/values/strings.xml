@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">E-shop</string>
     <string name="add_to_bag">Add to Bag</string>
+    <string name="catalogTopAppBarTitle">Shop by Categories</string>
+    <string name="backToCatalog">Navigate back to Catalog Screen</string>
+    <string name="web_client_id">794043878549-ltg77gopdkvqi3504a2gg0cchdno855h.apps.googleusercontent.com</string>
 </resources>

@@ -1,10 +1,5 @@
 package com.example.e_shop.core.util
 
-import android.net.Uri
-import android.os.Bundle
-import androidx.navigation.NavType
-import kotlinx.serialization.json.Json
-
 //object CustomNavType {
 //
 //    val specType = object : NavType<Specifications>(

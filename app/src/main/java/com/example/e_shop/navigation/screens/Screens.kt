@@ -16,6 +16,12 @@ sealed class Screens(val route: String) {
 
     @Serializable
     object Settings: Screens("settings")
+
+    @Serializable
+    object Payment: Screens("payment")
+
+    @Serializable
+    object AddPayment: Screens("add_payment")
 }
 
 @Serializable
@@ -37,11 +43,11 @@ sealed class HomeScreens(val route: String) {
     object Home : Screens("home")
 
     @Serializable
-    object Category : Screens("category")
-
-    @Serializable
     data class Details(val id: Int) : Screens ("details")
 
     @Serializable
-    data class Catalog(val name: String) : Screens("catalog")
+    object Catalog : Screens("catalog")
+
+    @Serializable
+    data class Category(val name: String) : Screens("category")
 }

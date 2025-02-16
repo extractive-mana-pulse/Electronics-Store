@@ -1,5 +1,10 @@
 package com.example.e_shop.auth.presentation.screens
 
+import android.app.Activity.RESULT_OK
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,38 +20,88 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.e_shop.R
+import com.example.e_shop.auth.presentation.GoogleAuthUiClient
+import com.example.e_shop.auth.presentation.vm.SignInViewModel
+import com.example.e_shop.core.extensions.toastMessage
 import com.example.e_shop.navigation.screens.AuthScreens
 import com.example.e_shop.navigation.screens.Graph
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun LoginScreen(
-    navController : NavHostController = rememberNavController()
+    navController : NavHostController = rememberNavController(),
+    googleAuthUiClient: GoogleAuthUiClient
 ) {
+
+    val context = LocalContext.current
+    val viewModel: SignInViewModel = hiltViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(key1 = Unit) {
+        if(googleAuthUiClient.getSignedInUser() != null) {
+            navController.navigate(Graph.HOME)
+        }
+    }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult(),
+        onResult = { result ->
+            if(result.resultCode == RESULT_OK) {
+                scope.launch {
+                    val signInResult = googleAuthUiClient.signInWithIntent(
+                        intent = result.data ?: return@launch
+                    )
+                    viewModel.onSignInResult(signInResult)
+                }
+            }
+        }
+    )
+    LaunchedEffect(key1 = state.isSignInSuccessful) {
+        Log.d("state", state.isSignInSuccessful.toString())
+        if(state.isSignInSuccessful) {
+            navController.navigate(Graph.HOME)
+            toastMessage(
+                context = context,
+                message = "Sign in successful"
+            )
+            viewModel.resetState()
+        } else {
+            toastMessage(
+                context = context,
+                message = state.signInError ?: "Sign in failed"
+            )
+        }
+    }
+
     var email by remember { mutableStateOf("") }
+
     Scaffold(
         topBar = {
             LargeTopAppBar(
@@ -84,7 +139,7 @@ fun LoginScreen(
                     shape = RoundedCornerShape(8.dp),
                     singleLine = true,
                 )
-//              TODO("If valid email, show another text field with password and text forgot password.")
+                /**"If valid email, show another text field with password and text forgot password."*/
                 Button(
                     onClick = { navController.navigate(Graph.HOME) },
                     modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth().height(56.dp)
@@ -120,7 +175,20 @@ fun LoginScreen(
                 verticalArrangement = Arrangement.Center
             ) {
                 Button(
-                    onClick = { /*TODO*/ },
+                    onClick = {
+                        scope.launch {
+                            val signInIntentSender = googleAuthUiClient.signIn()
+                            launcher.launch(
+                                IntentSenderRequest.Builder(
+                                    signInIntentSender ?: return@launch
+                                ).build()
+                            )
+                        }
+                        toastMessage(
+                            context = context,
+                            message = "Continue with google clicked"
+                        )
+                    },
                     modifier = Modifier.padding(16.dp).fillMaxWidth().height(56.dp),
                 ) {
                     Image(
