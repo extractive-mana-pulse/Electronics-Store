@@ -1,9 +1,6 @@
 package com.example.e_shop.core.di
 
 import com.example.e_shop.BuildConfig
-import com.example.e_shop.auth.data.remote.AuthApi
-import com.example.e_shop.auth.data.repositoryImpl.AuthRepositoryImpl
-import com.example.e_shop.auth.domain.repository.AuthRepository
 import com.example.e_shop.catalog.data.remote.CategoryApi
 import com.example.e_shop.catalog.data.repositoryImpl.CategoryRepositoryImpl
 import com.example.e_shop.catalog.domain.repository.CategoryRepository
@@ -23,6 +20,8 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+
+
 
     @Provides
     @Singleton

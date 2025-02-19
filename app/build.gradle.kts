@@ -6,11 +6,16 @@ plugins {
     id ("dagger.hilt.android.plugin")
     id ("com.google.gms.google-services")
     id("org.jetbrains.kotlin.plugin.compose") version "2.1.10"
+    id("androidx.room")
 }
 
 android {
     namespace = "com.example.e_shop"
     compileSdk = 35
+
+    room {
+        schemaDirectory("$projectDir/schemas")
+    }
 
     defaultConfig {
         applicationId = "com.example.e_shop"
@@ -122,6 +127,7 @@ dependencies {
     // room
     implementation (libs.androidx.room.ktx)
     implementation (libs.androidx.room.paging)
+    ksp("androidx.room:room-compiler:2.6.1")
 
     // paging
     implementation (libs.androidx.paging.runtime.ktx)

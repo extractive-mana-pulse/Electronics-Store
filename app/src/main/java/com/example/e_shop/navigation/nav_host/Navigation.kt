@@ -40,10 +40,10 @@ import com.example.e_shop.core.util.items
 import com.example.e_shop.navigation.screens.Graph
 import com.example.e_shop.navigation.screens.HomeScreens
 import com.example.e_shop.navigation.screens.Screens
-import com.example.e_shop.profile.presentation.AddPaymentScreen
-import com.example.e_shop.profile.presentation.PaymentScreen
-import com.example.e_shop.profile.presentation.ProfileScreen
-import com.example.e_shop.profile.presentation.SettingsPage
+import com.example.e_shop.profile.presentation.screens.AddPaymentScreen
+import com.example.e_shop.profile.presentation.screens.PaymentScreen
+import com.example.e_shop.profile.presentation.screens.ProfileScreen
+import com.example.e_shop.profile.presentation.screens.SettingsPage
 import kotlinx.coroutines.launch
 
 @OptIn(

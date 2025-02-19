@@ -1,4 +1,4 @@
-package com.example.e_shop.profile.presentation
+package com.example.e_shop.profile.presentation.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -57,27 +58,8 @@ fun SettingsPage(
     val context = LocalContext.current
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = "Settings",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontFamily = FontFamily(Font(R.font.gabarito_bold))
-                        )
-                    )
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = {
-                            navController.navigateUp()
-                        }
-                    ) {
-                        Icon(
-                            Icons.AutoMirrored.Default.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
-                }
+            SettingsScreenTopAppBar(
+                navController = navController
             )
         }
     ) { innerPadding ->
@@ -132,6 +114,38 @@ fun SettingsPage(
             }
         }
     }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun SettingsScreenTopAppBar(navController: NavController) {
+    CenterAlignedTopAppBar(
+        title = {
+            Text(
+                text = "Settings",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontFamily = FontFamily(Font(R.font.gabarito_bold))
+                )
+            )
+        },
+        navigationIcon = {
+            IconButton(
+                onClick = {
+                    navController.navigateUp()
+                },
+                modifier = Modifier
+                    .padding(start = 16.dp)
+                    .clip(CircleShape)
+                    .size(48.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Default.ArrowBack,
+                    contentDescription = "Back"
+                )
+            }
+        }
+    )
 }
 
 @Composable

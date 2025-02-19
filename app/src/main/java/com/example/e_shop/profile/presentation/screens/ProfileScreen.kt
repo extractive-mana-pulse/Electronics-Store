@@ -1,4 +1,4 @@
-package com.example.e_shop.profile.presentation
+package com.example.e_shop.profile.presentation.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
